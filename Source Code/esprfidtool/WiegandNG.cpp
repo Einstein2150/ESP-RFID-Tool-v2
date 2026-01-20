@@ -6,7 +6,7 @@ volatile unsigned long  WiegandNG::_lastPulseTime;  // time last bit pulse recei
 volatile unsigned int WiegandNG::_bitCounted;   // number of bits arrived at Interrupt pins
 volatile unsigned char  *WiegandNG::_buffer;    // buffer for data retention
 unsigned int      WiegandNG::_bufferSize;   // memory (bytes) allocated for buffer
-
+WiegandNG::RawCallback WiegandNG::_rawCallback = nullptr;
 
 void shift_left(volatile unsigned char *ar, int size, int shift)
 {
@@ -57,6 +57,10 @@ unsigned int WiegandNG::getBufferSize() {
   return _bufferSize;
 }
 
+void WiegandNG::onRawData(RawCallback cb) {
+  _rawCallback = cb;
+}
+
 bool WiegandNG::available() {
   bool ret=false;
   noInterrupts();
@@ -76,6 +80,10 @@ bool WiegandNG::available() {
         Serial.print(",");
         Serial.println(tempLastPulseTime);
       }*/
+      if (_rawCallback) {
+        _rawCallback(_buffer, _bitCounted);
+      }
+      
       ret=true;
     }
     else
@@ -87,12 +95,14 @@ bool WiegandNG::available() {
 }
 
 void WiegandNG::ReadD0 () {
+  //Serial.println("D0 IRQ");
   _bitCounted++;                  // increment bit count for Interrupt connected to D0
   shift_left(_buffer,_bufferSize,1);        // shift 0 into buffer
   _lastPulseTime = millis();            // keep track of time last wiegand bit received
 }
 
 void WiegandNG::ReadD1() {
+  //Serial.println("D1 IRQ");
   _bitCounted++;                  // increment bit count for Interrupt connected to D1
   if (_bitCounted > (_bufferSize * 8)) {
     _bitCounted=0;                // overflowed, 
@@ -111,6 +121,7 @@ bool WiegandNG::begin(unsigned int allocateBits, unsigned int packetGap) {
 }
 
 bool WiegandNG::begin(uint8_t pinD0, uint8_t pinD1, unsigned int allocateBits, unsigned int packetGap) {
+  //Serial.println("Wiegand has began...");
   if (_buffer != NULL) {
     delete [] _buffer;
   }

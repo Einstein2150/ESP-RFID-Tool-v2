@@ -100,6 +100,12 @@ int dos=0;
 int TXstatus=0;
 String pinHTML;
 
+String newUIDHex = "";
+String newReplayBinary = "";
+String newBitstream = "";
+unsigned int newBitCount = 0;
+String newUIDFormat = "";
+
 #include "pinSEND.h"
 
 String dataCONVERSION="";
@@ -503,15 +509,15 @@ void LogWiegand(WiegandNG &tempwg) {
   }
 
   if (countedBits<=52 && unknown!=true) {
-    f.print(",HEX:");
-    if (binChunk2exists==true) {
-      f.print(cardChunk1, HEX);
-      Serial.print("cardChunk1+2: ");
-      Serial.print(cardChunk1, HEX);
-    }
+    //f.print(",HEX:");
+    //if (binChunk2exists==true) {
+    //  f.print(cardChunk1, HEX);
+    //  Serial.print("cardChunk1+2: ");
+    //  Serial.print(cardChunk1, HEX);
+    //}
     //f.print(" "); //debug line
-    f.println(cardChunk2, HEX);
-    Serial.println(cardChunk2, HEX);
+    //f.println(cardChunk2, HEX);
+    //Serial.println(cardChunk2, HEX);
   
     cardChunkConcat = String(cardChunk1, HEX) + String(cardChunk2, HEX); //concat the two hex-chunks to one bin
     //Serial.print("cardChunkConcatString: ");
@@ -530,19 +536,42 @@ void LogWiegand(WiegandNG &tempwg) {
     cardChunkConcat = binaryToHex(cardChunkConcat);
     //Serial.print("cardChunkConcat-reHEXed: ");
     //Serial.println(cardChunkConcat);
-    f.print("--> Clean-HEX:");
-    f.print(cardChunkConcat);
+    //f.print("--> Clean-HEX:");
+    //f.print(cardChunkConcat);
     
     cardChunkConcat = reverseHex(cardChunkConcat);
     //Serial.print("Card-UID: ");
     //Serial.println(cardChunkConcat);
     //Serial.println();
-    f.print(", Card-UID:");
-    f.print(cardChunkConcat);
+    //f.print(", Card-UID:");
+    //f.print(cardChunkConcat);
+    //f.print("<button onclick=\"window.location.href='/api/tx/bin?binary=");
+    //f.print(cardBinReplay);
+    //f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
+    //f.println("");
+
+    //RAW-WIEGAND and UID-Parsing
+    f.print("<br>");
+    f.println("<br>Data-Analysis:<br>");
+
+    f.print("RAW Bits: ");
+    f.print(newBitstream);
+    f.print("<br>");
+
+    f.print("RAW UID: ");
+    f.print(newUIDHex);
+    f.print("<br>");
+
+    f.print("RAW Format: ");
+    f.print(newUIDFormat);
+    f.print("<br>");
+    
     f.print("<button onclick=\"window.location.href='/api/tx/bin?binary=");
     f.print(cardBinReplay);
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
-    //f.println("");
+    f.print("<br>");
+
+    
   }
   else if (countedBits==4||countedBits==8) {
     f.print(",Keypad Code:");
@@ -1176,6 +1205,85 @@ void setup() {
     Serial.println(F("Could not begin Wiegand logging,"));            
     Serial.println(F("Out of memory!"));
   }
+
+//RAW-WIEGAND-DATA
+wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
+
+    newBitCount     = bits;
+    newBitstream    = "";
+    newReplayBinary = "";
+    newUIDHex       = "";
+    newUIDFormat    = "";
+
+    Serial.print("RAW CALLBACK TRIGGERED, bits=");
+    Serial.println(bits);
+
+    // Buffergröße holen
+    unsigned int bufferSize = wg.getBufferSize();
+    int countedBytes = (bits + 7) / 8;
+    int offset = bufferSize - countedBytes;
+
+    // Bit-Leser
+    auto getBit = [&](int pos) {
+        int byteIndex = offset + (pos >> 3);
+        int bitIndex  = 7 - (pos & 7);
+        return (data[byteIndex] >> bitIndex) & 1;
+    };
+
+    // --- 1. Echte Bits = letzte N Bits im 40-Bit-Block ---
+    // Buffer enthält 40 Bits → echte Bits = raw[40 - bits .. 39]
+    int start = 40 - bits;
+    String realBits = "";
+    for (int i = start; i < 40; i++) {
+        realBits += getBit(i) ? '1' : '0';
+    }
+
+    newBitstream = realBits;
+
+    Serial.print("RAW BITSTREAM: ");
+    Serial.println(newBitstream);
+
+    // --- 2. UID extrahieren je nach Bitlänge ---
+    uint32_t rawUID = 0;
+
+    if (bits == 34) {
+        // Parity vorne = Bit 0
+        // Nutzbits = Bits 1..32
+        for (int i = 1; i <= 32; i++) {
+            rawUID = (rawUID << 1) | (newBitstream[i] == '1');
+        }
+        newUIDFormat = "Wiegand 34 (UID32 Little-Endian)";
+    }
+    else if (bits == 32) {
+        // Direkt 32 Nutzbits
+        for (int i = 0; i < 32; i++) {
+            rawUID = (rawUID << 1) | (newBitstream[i] == '1');
+        }
+        newUIDFormat = "Wiegand 32 (UID32 Little-Endian)";
+    }
+    else {
+        newUIDHex = "UNKNOWN";
+        newUIDFormat = "Unsupported (" + String(bits) + " bits)";
+        Serial.println("Unsupported bit length");
+        return;
+    }
+
+    // --- 3. Little-Endian konvertieren ---
+    uint32_t uid =
+        ((rawUID & 0x000000FF) << 24) |
+        ((rawUID & 0x0000FF00) << 8)  |
+        ((rawUID & 0x00FF0000) >> 8)  |
+        ((rawUID & 0xFF000000) >> 24);
+
+    char buf[20];
+    sprintf(buf, "%08X", uid);
+
+    newUIDHex = String(buf);
+
+    Serial.print("RAW UID: ");
+    Serial.println(newUIDHex);
+});
+
 
 //Set up Web Pages
   server.on("/",[]() {

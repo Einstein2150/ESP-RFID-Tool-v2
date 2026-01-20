@@ -18,9 +18,11 @@ private:
   unsigned int          _bitAllocated;    // wiegand bits required
   unsigned int          _packetGap;     // gap between wiegand packet in millisecond
   static volatile unsigned char * _buffer;      // buffer for data retention
-  
+  typedef void (*RawCallback)(volatile unsigned char* data, unsigned int bitCount);
+  static RawCallback _rawCallback;
+
 public:
-  bool begin(unsigned int bits, unsigned int packetGap=25);       // default packetGap is 25ms
+  bool begin(unsigned int bits, unsigned int packetGap=25);
   bool begin(uint8_t pinD0, uint8_t pinD1, unsigned int bits, unsigned int packetGap);
   bool available();
   void clear();
@@ -32,7 +34,7 @@ public:
   volatile unsigned char *getRawData();
   WiegandNG();
   ~WiegandNG();
+  void onRawData(RawCallback cb);
 };
 
 #endif
-
