@@ -37,6 +37,16 @@ Original Software by Corey Harding
 <img src="Images/board-v2 back.png" alt="Frontend" width="300"/>
 <img src="Images/board-v2 uncovered.png" alt="Frontend" width="300"/>
 
+
+* Partlist
+  * NodeMCU (https://s.click.aliexpress.com/e/_o2Eqd58)
+  * 2N7000 MOSFET (https://s.click.aliexpress.com/e/_olmBzaJ)
+  * Screw Terminal (https://s.click.aliexpress.com/e/_omyENv4)
+  * LM7805 Voltage Regulator (https://s.click.aliexpress.com/e/_oCx5TvV)
+  * Female header socket (https://s.click.aliexpress.com/e/_ommKfRt)
+  * 4.7K Ohm Resistor (https://s.click.aliexpress.com/e/_olvKDen)
+  * PCB Boards (https://s.click.aliexpress.com/e/_okuIjvM)
+
 * it has an additional voltage regulator for higher voltage
 * board-v2 uses 2 MOSFET (i.e. 2N7000) for replay-attacks which makes the ability of stronger comunication because the Wiegand datalines get strong grounded
 *  you can use the ESP-RFID-Tool-v2 firmware on the original board from Corey Harding but it wouldn't have the improvements because they relie on additional hardware.
