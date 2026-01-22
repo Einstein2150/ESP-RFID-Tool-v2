@@ -64,9 +64,57 @@ server.on("/api/tx/bin", [](){
   }
 });
 
+server.on("/api/txinstant/bin", []() {
+  String api_binary = "";
+  int api_pulsewidth = txdelayus;
+  int api_datainterval = (txdelayms * 1000);
+  int api_wait = 100000;
+
+  if (server.hasArg("binary")) {
+    api_binary = server.arg("binary");
+  }
+  if (server.hasArg("pulsewidth")) {
+    api_pulsewidth = server.arg("pulsewidth").toInt();
+  }
+  if (server.hasArg("interval")) {
+    api_datainterval = server.arg("interval").toInt();
+  }
+  if (server.hasArg("wait")) {
+    api_wait = server.arg("wait").toInt();
+  }
+
+  // Bits senden
+  apiTX(api_binary, api_pulsewidth, api_datainterval, api_wait);
+
+  // Sofortige Antwort ohne JSON → zurück zur vorherigen Seite
+  server.send(200, "text/html",
+    "<html><body><script>history.back();</script></body></html>");
+});
+
+
 server.on("/api/help", [](){
   String apihelpHTML=String()+F(
-  "<a href=\"/\"><- BACK TO INDEX</a><br><br>"
+  "<!DOCTYPE HTML>"
+  "<head>"
+  "<meta charset=\"UTF-8\">"
+  "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
+  "<style>"
+  "body {"
+  "font-family: 'Arial', sans-serif;"
+  "font-size: 16px;"
+  "background-color: #f0f0f0;"
+  "color: #333;"
+  "}"
+  "button {"
+  "width: 80%;"
+  "height: 40px;"
+  "display: block;"
+  "margin: 10 px auto;"
+  "font-size: 16px;"
+  "}"
+  "</style>"
+  "<button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+  "<br>"
   "<b>API Version: "
   )+APIversion+F(
   "</b><br><br>"

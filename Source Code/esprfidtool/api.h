@@ -1,19 +1,77 @@
-void apiTX(String apiBIN, int apipulsewidth, int apidatainterval, int wait) {
+void apiTXinstant(String apiBIN, int apipulsewidth, int apidatainterval, int wait) {
   wg.pause();
+
   digitalWrite(DATA0, HIGH);
+  digitalWrite(DATA0_MOS, LOW);
   pinMode(DATA0,OUTPUT);
+  pinMode(DATA0_MOS,OUTPUT);
+
   digitalWrite(DATA1, HIGH);
+  digitalWrite(DATA1_MOS, LOW);
   pinMode(DATA1,OUTPUT);
-  for (int i=0; i<=apiBIN.length(); i++) {
+  pinMode(DATA1_MOS,OUTPUT);
+
+  for (int i=0; i<apiBIN.length(); i++) {
     if (apiBIN.charAt(i) == '0') {
       digitalWrite(DATA0, LOW);
+      digitalWrite(DATA0_MOS, HIGH);
       delayMicroseconds(apipulsewidth);
       digitalWrite(DATA0, HIGH);
+      digitalWrite(DATA0_MOS, LOW);
     }
     else if (apiBIN.charAt(i) == '1') {
       digitalWrite(DATA1, LOW);
+      digitalWrite(DATA1_MOS, HIGH);
       delayMicroseconds(apipulsewidth);
       digitalWrite(DATA1, HIGH);
+      digitalWrite(DATA1_MOS, LOW);
+    }
+
+    if (apiBIN.charAt(i) == ',') {
+      delayMicroseconds(wait);
+    } else {
+      delayMicroseconds(apidatainterval);
+    }
+  }
+
+  apiBIN = "";
+
+  pinMode(DATA0, INPUT);
+  pinMode(DATA0_MOS, INPUT);
+  pinMode(DATA1, INPUT);
+  pinMode(DATA1_MOS, INPUT);
+
+  wg.clear();
+
+  // --- RESPOND WITHOUT JSON ---
+  server.send(200, "text/html",
+    "<html><body><script>history.back();</script></body></html>");
+}
+
+void apiTX(String apiBIN, int apipulsewidth, int apidatainterval, int wait) {
+  wg.pause();
+      digitalWrite(DATA0, HIGH);
+      digitalWrite(DATA0_MOS, LOW);
+      pinMode(DATA0,OUTPUT);
+      pinMode(DATA0_MOS,OUTPUT);
+      digitalWrite(DATA1, HIGH);
+      digitalWrite(DATA1_MOS, LOW);
+      pinMode(DATA1,OUTPUT);
+      pinMode(DATA1_MOS,OUTPUT);
+  for (int i=0; i<=apiBIN.length(); i++) {
+    if (apiBIN.charAt(i) == '0') {
+      digitalWrite(DATA0, LOW);
+      digitalWrite(DATA0_MOS, HIGH);
+      delayMicroseconds(apipulsewidth);
+      digitalWrite(DATA0, HIGH);
+      digitalWrite(DATA0_MOS, LOW);
+    }
+    else if (apiBIN.charAt(i) == '1') {
+      digitalWrite(DATA1, LOW);
+      digitalWrite(DATA1_MOS, HIGH);
+      delayMicroseconds(apipulsewidth);
+      digitalWrite(DATA1, HIGH);
+      digitalWrite(DATA1_MOS, LOW);
     }
     if (apiBIN.charAt(i) == ',') {
       delayMicroseconds(wait);
@@ -23,8 +81,10 @@ void apiTX(String apiBIN, int apipulsewidth, int apidatainterval, int wait) {
     }
   }
   apiBIN="";
-  pinMode(DATA0, INPUT);
-  pinMode(DATA1, INPUT);
+      pinMode(DATA0, INPUT);
+      pinMode(DATA0_MOS, INPUT);
+      pinMode(DATA1, INPUT);
+      pinMode(DATA1_MOS, INPUT);
   wg.clear();
 }
 

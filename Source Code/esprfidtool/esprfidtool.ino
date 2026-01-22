@@ -566,7 +566,7 @@ void LogWiegand(WiegandNG &tempwg) {
     f.print(newUIDFormat);
     f.print("<br>");
     
-    f.print("<button onclick=\"window.location.href='/api/tx/bin?binary=");
+    f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
     f.print(cardBinReplay);
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     f.print("<br>");
@@ -632,7 +632,7 @@ void LogWiegand(WiegandNG &tempwg) {
       sprintf(hexCHAR, "%02X", binChunk1);
       f.println(hexCHAR);
 
-    f.print("<button onclick=\"window.location.href='/api/tx/bin?binary=");
+    f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
     f.print(hexToBinary(hexCHAR));
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     //f.println("");
@@ -642,7 +642,7 @@ void LogWiegand(WiegandNG &tempwg) {
       f.println(binChunk1, HEX);
 
     String keyHex = String(binChunk1, HEX);
-    f.print("<button onclick=\"window.location.href='/api/tx/bin?binary=");
+    f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
     f.print(hexToBinary(keyHex));
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     //f.println("");
@@ -1260,6 +1260,16 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
             rawUID = (rawUID << 1) | (newBitstream[i] == '1');
         }
         newUIDFormat = "Wiegand 32 (UID32 Little-Endian)";
+    }
+    else if (bits == 35) {
+        // Wiegand 35:
+        // Bit 0 = Leading Parity
+        // Bits 1..32 = UID32
+        // Bits 33..34 = Trailing Parity
+        for (int i = 1; i <= 32; i++) {
+            rawUID = (rawUID << 1) | (newBitstream[i] == '1');
+        }
+        newUIDFormat = "Wiegand 35 (UID32 Little-Endian)";
     }
     else {
         newUIDHex = "UNKNOWN";
