@@ -110,6 +110,103 @@ String newUIDFormat = "";
 
 String dataCONVERSION="";
 
+String mapKeyToBits(char key, int bits) {
+    if (bits == 4) {
+        switch (key) {
+            case '0': return "0000";
+            case '1': return "0001";
+            case '2': return "0010";
+            case '3': return "0011";
+            case '4': return "0100";
+            case '5': return "0101";
+            case '6': return "0110";
+            case '7': return "0111";
+            case '8': return "1000";
+            case '9': return "1001";
+            case '*': case 'A': return "1010";
+            case '#': case 'B': return "1011";
+            case 'C': return "1100";
+            case 'D': return "1101";
+            case 'E': return "1110";
+            case 'F': return "1111";
+        }
+    }
+    if (bits == 8) {
+        switch (key) {
+            case '0': return "11110000";
+            case '1': return "11100001";
+            case '2': return "11010010";
+            case '3': return "11000011";
+            case '4': return "10110100";
+            case '5': return "10100101";
+            case '6': return "10010110";
+            case '7': return "10000111";
+            case '8': return "01111000";
+            case '9': return "01101001";
+            case '*': case 'A': return "01011010";
+            case '#': case 'B': return "01001011";
+            case 'C': return "00111100";
+            case 'D': return "00101101";
+            case 'E': return "00011110";
+            case 'F': return "00001111";
+        }
+    }
+    return "";
+}
+
+String mapBitsToKey(uint8_t bits) {
+    switch (bits) {
+        // 0
+        case 0b00000000: return "0";   // 4-bit
+        case 0b11110000: return "0";   // 8-bit
+        // 1
+        case 0b00000001: return "1";
+        case 0b11100001: return "1";
+        // 2
+        case 0b00000010: return "2";
+        case 0b11010010: return "2";
+        // 3
+        case 0b00000011: return "3";
+        case 0b11000011: return "3";
+        // 4
+        case 0b00000100: return "4";
+        case 0b10110100: return "4";
+        // 5
+        case 0b00000101: return "5";
+        case 0b10100101: return "5";
+        // 6
+        case 0b00000110: return "6";
+        case 0b10010110: return "6";
+        // 7
+        case 0b00000111: return "7";
+        case 0b10000111: return "7";
+        // 8
+        case 0b00001000: return "8";
+        case 0b01111000: return "8";
+        // 9
+        case 0b00001001: return "9";
+        case 0b01101001: return "9";
+        // *
+        case 0b00001010: return "*";
+        case 0b01011010: return "*";
+        // #
+        case 0b00001011: return "# or Enter";
+        case 0b01001011: return "# or Enter";
+        // F1
+        case 0b00001100: return "F1";
+        case 0b00111100: return "F1";
+        // F2
+        case 0b00001101: return "F2";
+        case 0b00101101: return "F2";
+        // F3
+        case 0b00001110: return "F3";
+        case 0b00011110: return "F3";
+        // F4
+        case 0b00001111: return "F4"; // beide identisch → aber korrekt, da 8-bit Code = 00001111
+    }
+    return "?";
+}
+
 WiegandNG wg;
 
 void LogWiegand(WiegandNG &tempwg) {
@@ -569,86 +666,32 @@ void LogWiegand(WiegandNG &tempwg) {
     f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
     f.print(cardBinReplay);
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
-    f.print("<br>");
-
-    
+    f.print("<br>");  
   }
-  else if (countedBits==4||countedBits==8) {
+  
+  else if (countedBits == 4 || countedBits == 8) {
     f.print(",Keypad Code:");
-    if (binChunk1 == 0B0000||binChunk1 == 0b11110000) {
-      f.print("0");
-    }
-    else if (binChunk1 == 0B0001||binChunk1 == 0b11100001) {
-      f.print("1");
-    }
-    else if (binChunk1 == 0B0010||binChunk1 == 0b11010010) {
-      f.print("2");
-    }
-    else if (binChunk1 == 0B0011||binChunk1 == 0b11000011) {
-      f.print("3");
-    }
-    else if (binChunk1 == 0B0100||binChunk1 == 0b10110100) {
-      f.print("4");
-    }
-    else if (binChunk1 == 0B0101||binChunk1 == 0b10100101) {
-      f.print("5");
-    }
-    else if (binChunk1 == 0B0110||binChunk1 == 0b10010110) {
-      f.print("6");
-    }
-    else if (binChunk1 == 0B0111||binChunk1 == 0b10000111) {
-      f.print("7");
-    }
-    else if (binChunk1 == 0B1000||binChunk1 == 0b01111000) {
-      f.print("8");
-    }
-    else if (binChunk1 == 0B1001||binChunk1 == 0b01101001) {
-      f.print("9");
-    }
-    else if (binChunk1 == 0B1010||binChunk1 == 0b01011010) {
-      f.print("*");
-    }
-    else if (binChunk1 == 0B1011||binChunk1 == 0b01001011) {
-      f.print("# or Enter");
-    }
-    else if (binChunk1 == 0b1100||binChunk1 == 0b00111100) {
-      f.print("F1");
-    }
-    else if (binChunk1 == 0b1101||binChunk1 == 0b00101101) {
-      f.print("F2");
-    }
-    else if (binChunk1 == 0b1110||binChunk1 == 0b00011110) {
-      f.print("F3");
-    }
-    else if (binChunk1 == 0b1111||binChunk1 == 0b00001111) {
-      f.print("F4");
-    }
-    else {
-      f.print("?");
-    }
+    f.print(mapBitsToKey(binChunk1));
     f.print(",HEX:");
-    if (countedBits==8) {
-      char hexCHAR[3];
-      sprintf(hexCHAR, "%02X", binChunk1);
-      f.println(hexCHAR);
+    if (countedBits == 8) {
+        char hexCHAR[3];
+        sprintf(hexCHAR, "%02X", binChunk1);
+        f.println(hexCHAR);
 
-    f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
-    f.print(hexToBinary(hexCHAR));
-    f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
-    //f.println("");
-      
+        f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
+        f.print(hexToBinary(hexCHAR));
+        f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     }
-    else if (countedBits==4) {
-      f.println(binChunk1, HEX);
+    else if (countedBits == 4) {
+        f.println(binChunk1, HEX);
 
-    String keyHex = String(binChunk1, HEX);
-    f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
-    f.print(hexToBinary(keyHex));
-    f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
-    //f.println("");
-      
+        String keyHex = String(binChunk1, HEX);
+        f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
+        f.print(hexToBinary(keyHex));
+        f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     }
   }
+  
   else if (countedBits==248) {
     f.println(",");
   }
@@ -1067,12 +1110,13 @@ void ListLogs(){
   String freespace;
   freespace=fs_info.totalBytes-fs_info.usedBytes;
   Dir dir = SPIFFS.openDir(directory);
-     String FileList = String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Logs")+"<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br><table border='1'><tr><td><b>Display File Contents</b></td><td><b>Size in Bytes</b></td><td><b>Download File</b></td><td><b>Delete File</b></td></tr>";
+     String FileList = String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Logs")+"<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>Select Logfile to display:<br><br><table border='1'><tr><td><b>Display File Content</b></td><td><b>Size in Bytes</b></td><td><b>Download File</b></td><td><b>Delete File</b></td></tr>";
   while (dir.next()) {
     String FileName = dir.fileName();
     File f = dir.openFile("r");
     FileList += " ";
-    if((!FileName.startsWith("/payloads/"))&&(!FileName.startsWith("/esploit.json"))&&(!FileName.startsWith("/esportal.json"))&&(!FileName.startsWith("/esprfidtool.json"))&&(!FileName.startsWith("/config.json"))) FileList += "<tr><td><a href=\"/viewlog?payload="+FileName+"\">"+FileName+"</a></td>"+"<td>"+f.size()+"</td><td><a href=\""+FileName+"\"><button>Download File</button></td><td><a href=\"/deletelog?payload="+FileName+"\"><button>Delete File</button></td></tr>";
+    //if((!FileName.startsWith("/payloads/"))&&(!FileName.startsWith("/esploit.json"))&&(!FileName.startsWith("/esportal.json"))&&(!FileName.startsWith("/esprfidtool.json"))&&(!FileName.startsWith("/config.json"))) FileList += "<tr><td><a href=\"/viewlog?payload="+FileName+"\">"+FileName+"</a></td>"+"<td>"+f.size()+"</td><td><a href=\""+FileName+"\"><button>Download File</button></td><td><a href=\"/deletelog?payload="+FileName+"\"><button>Delete File</button></td></tr>";
+    if((!FileName.startsWith("/payloads/"))&&(!FileName.startsWith("/esploit.json"))&&(!FileName.startsWith("/latestlog.json"))&&(!FileName.startsWith("/eventlog.json"))&&(!FileName.startsWith("/esportal.json"))&&(!FileName.startsWith("/esprfidtool.json"))&&(!FileName.startsWith("/config.json"))) FileList += "<tr><td><a href=\"/viewlog?payload="+FileName+"\"><button>"+FileName+"</button></a></td><td>"+String(f.size())+"</td><td><a href=\""+FileName+"\"><button>Download File</button></td><td><a href=\"/deletelog?payload="+FileName+"\"><button>Delete File</button></td></tr>";
     f.close();
   }
   FileList += "</table>";
@@ -1306,8 +1350,28 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     String freespace;
     freespace=fs_info.totalBytes-fs_info.usedBytes;*/
     server.send(200, "text/html", String()+F("<html>")+css("ESP-RFID-Tool-v2")+F("<body><h1><b>ESP-RFID-Tool v")+version+F("</b></h1>"
-    //"<img width='86' height='86' src='data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+CjwhLS0gQ3JlYXRlZCB3aXRoIElua3NjYXBlIChodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy8pIC0tPgoKPHN2ZwogICB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iCiAgIHhtbG5zOmNjPSJodHRwOi8vY3JlYXRpdmVjb21tb25zLm9yZy9ucyMiCiAgIHhtbG5zOnJkZj0iaHR0cDovL3d3dy53My5vcmcvMTk5OS8wMi8yMi1yZGYtc3ludGF4LW5zIyIKICAgeG1sbnM6c3ZnPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIKICAgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIgogICB4bWxuczpzb2RpcG9kaT0iaHR0cDovL3NvZGlwb2RpLnNvdXJjZWZvcmdlLm5ldC9EVEQvc29kaXBvZGktMC5kdGQiCiAgIHhtbG5zOmlua3NjYXBlPSJodHRwOi8vd3d3Lmlua3NjYXBlLm9yZy9uYW1lc3BhY2VzL2lua3NjYXBlIgogICB3aWR0aD0iNTYuNTkwNzI5bW0iCiAgIGhlaWdodD0iNDMuODMwODMzbW0iCiAgIHZpZXdCb3g9IjAgMCA1Ni41OTA3MjggNDMuODMwODM0IgogICB2ZXJzaW9uPSIxLjEiCiAgIGlkPSJzdmczMDAwIgogICBpbmtzY2FwZTp2ZXJzaW9uPSIwLjkyLjIgKDVjM2U4MGQsIDIwMTctMDgtMDYpIgogICBzb2RpcG9kaTpkb2NuYW1lPSJyZmlkdG9vbDQuc3ZnIj4KICA8ZGVmcwogICAgIGlkPSJkZWZzMjk5NCI+CiAgICA8ZmlsdGVyCiAgICAgICBzdHlsZT0iY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzOnNSR0I7IgogICAgICAgaW5rc2NhcGU6bGFiZWw9IkNyb3NzIEJsdXIiCiAgICAgICBpZD0iZmlsdGVyMzEyMCI+CiAgICAgIDxmZUNvbG9yTWF0cml4CiAgICAgICAgIGluPSJTb3VyY2VHcmFwaGljIgogICAgICAgICB2YWx1ZXM9IjEgMCAwIDAgMCAwIDEgMCAwIDAgMCAwIDEgMCAwIC0wLjIxMjUgLTAuNzE1NCAtMC4wNzIxIDEgMCAiCiAgICAgICAgIHJlc3VsdD0iY29sb3JtYXRyaXgiCiAgICAgICAgIGlkPSJmZUNvbG9yTWF0cml4MzExMCIgLz4KICAgICAgPGZlQ29tcG9zaXRlCiAgICAgICAgIGluPSJTb3VyY2VHcmFwaGljIgogICAgICAgICBpbjI9ImNvbG9ybWF0cml4IgogICAgICAgICBvcGVyYXRvcj0iYXJpdGhtZXRpYyIKICAgICAgICAgazI9IjEiCiAgICAgICAgIGszPSIwIgogICAgICAgICBrND0iMCIKICAgICAgICAgcmVzdWx0PSJjb21wb3NpdGUiCiAgICAgICAgIGlkPSJmZUNvbXBvc2l0ZTMxMTIiIC8+CiAgICAgIDxmZUdhdXNzaWFuQmx1cgogICAgICAgICBzdGREZXZpYXRpb249IjAuNzUgMC4wMSIKICAgICAgICAgcmVzdWx0PSJibHVyMSIKICAgICAgICAgaWQ9ImZlR2F1c3NpYW5CbHVyMzExNCIgLz4KICAgICAgPGZlR2F1c3NpYW5CbHVyCiAgICAgICAgIGluPSJjb21wb3NpdGUiCiAgICAgICAgIHN0ZERldmlhdGlvbj0iMC4wMSAwLjc1IgogICAgICAgICByZXN1bHQ9ImJsdXIyIgogICAgICAgICBpZD0iZmVHYXVzc2lhbkJsdXIzMTE2IiAvPgogICAgICA8ZmVCbGVuZAogICAgICAgICBpbj0iYmx1cjIiCiAgICAgICAgIGluMj0iYmx1cjEiCiAgICAgICAgIG1vZGU9ImRhcmtlbiIKICAgICAgICAgcmVzdWx0PSJibGVuZCIKICAgICAgICAgaWQ9ImZlQmxlbmQzMTE4IiAvPgogICAgPC9maWx0ZXI+CiAgPC9kZWZzPgogIDxzb2RpcG9kaTpuYW1lZHZpZXcKICAgICBpZD0iYmFzZSIKICAgICBwYWdlY29sb3I9IiNmZmZmZmYiCiAgICAgYm9yZGVyY29sb3I9IiM2NjY2NjYiCiAgICAgYm9yZGVyb3BhY2l0eT0iMS4wIgogICAgIGlua3NjYXBlOnBhZ2VvcGFjaXR5PSIwLjAiCiAgICAgaW5rc2NhcGU6cGFnZXNoYWRvdz0iMiIKICAgICBpbmtzY2FwZTp6b29tPSIyLjA2MTY4NDgiCiAgICAgaW5rc2NhcGU6Y3g9IjE5NC44Njc5IgogICAgIGlua3NjYXBlOmN5PSI4Ny4zNDU1MTUiCiAgICAgaW5rc2NhcGU6ZG9jdW1lbnQtdW5pdHM9Im1tIgogICAgIGlua3NjYXBlOmN1cnJlbnQtbGF5ZXI9ImxheWVyMSIKICAgICBzaG93Z3JpZD0iZmFsc2UiCiAgICAgZml0LW1hcmdpbi10b3A9IjAiCiAgICAgZml0LW1hcmdpbi1sZWZ0PSIwIgogICAgIGZpdC1tYXJnaW4tcmlnaHQ9IjAiCiAgICAgZml0LW1hcmdpbi1ib3R0b209IjAiCiAgICAgaW5rc2NhcGU6d2luZG93LXdpZHRoPSIxMzY2IgogICAgIGlua3NjYXBlOndpbmRvdy1oZWlnaHQ9IjY1OSIKICAgICBpbmtzY2FwZTp3aW5kb3cteD0iMCIKICAgICBpbmtzY2FwZTp3aW5kb3cteT0iMzEiCiAgICAgaW5rc2NhcGU6d2luZG93LW1heGltaXplZD0iMSIgLz4KICA8bWV0YWRhdGEKICAgICBpZD0ibWV0YWRhdGEyOTk3Ij4KICAgIDxyZGY6UkRGPgogICAgICA8Y2M6V29yawogICAgICAgICByZGY6YWJvdXQ9IiI+CiAgICAgICAgPGRjOmZvcm1hdD5pbWFnZS9zdmcreG1sPC9kYzpmb3JtYXQ+CiAgICAgICAgPGRjOnR5cGUKICAgICAgICAgICByZGY6cmVzb3VyY2U9Imh0dHA6Ly9wdXJsLm9yZy9kYy9kY21pdHlwZS9TdGlsbEltYWdlIiAvPgogICAgICAgIDxkYzp0aXRsZSAvPgogICAgICA8L2NjOldvcms+CiAgICA8L3JkZjpSREY+CiAgPC9tZXRhZGF0YT4KICA8ZwogICAgIGlua3NjYXBlOmxhYmVsPSJMYXllciAxIgogICAgIGlua3NjYXBlOmdyb3VwbW9kZT0ibGF5ZXIiCiAgICAgaWQ9ImxheWVyMSIKICAgICB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTgxLjkzNTEsLTIyNi4xMTMpIj4KICAgIDxwYXRoCiAgICAgICBpZD0icGF0aDM1NTYiCiAgICAgICB0cmFuc2Zvcm09Im1hdHJpeCgwLjI2NDU4MzMzLDAsMCwwLjI2NDU4MzMzLDE2Mi44OTQyMywyMTguNDkzODEpIgogICAgICAgc3R5bGU9ImZpbGw6IzAwMDAwMDtzdHJva2Utd2lkdGg6MS4wMDAwMDAxMjtmaWx0ZXI6dXJsKCNmaWx0ZXIzMTIwKSIKICAgICAgIGQ9Im0gMjI3LjkwODIsMTY2LjE0NDYyIC01LjEwMTU2LDQuNDYyODkgYyAtMjQuNDMxNTUsMjEuMzcyMTMgLTY1LjU3MjQsMjEuNzYwMjYgLTg5LjQ3MjY2LDAuODQzNzUgbCAtNS4zMjgxMiwtNC42NjIxMSAtMi4wNTY2NCwyLjA1ODYgLTIuMDU4NiwyLjA1NjY0IDMuNzU1ODYsMy4zMzc4OSBjIDEwLjgwMDY4LDkuNTk5ODUgMjQuMDYxLDE1Ljc4Mjk4IDM5LjAxMzY4LDE4LjE5MTQgNi40NjIwNCwxLjA0MDg1IDI0LjA5MTgsLTAuMjg4MjYgMzEuNDcyNjUsLTIuMzczMDQgOS45MTM0LC0yLjgwMDE0IDIxLjQ1OTMxLC04LjkxNTM3IDI4LjExOTE0LC0xNC44OTI1OCA1LjM1Nzc1LC00LjgwODU4IDUuMzkxNjQsLTQuODczNzkgMy41MzMyMSwtNi45Mzk0NSB6IG0gLTExLjEzMDg2LC0xMC4zMTA1NSBjIC0wLjg2NDc4LDAuMDgzOCAtMi4wOTk2NCwxLjA1MTExIC00Ljg1MTU2LDMuMjQyMTkgLTEwLjEwMjYsOC4wNDM4NiAtMjEuMzM5MTMsMTEuOTczMjkgLTM0LjMwNDY5LDExLjk5MjE5IC0xMy4wNDM0MSwwLjAxOTMgLTIyLjU2ODY2LC0zLjE4Njk0IC0zMy4zMTgzNiwtMTEuMjE0ODQgbCAtNS4zNTkzNywtNC4wMDE5NiAtMi4wMDE5NSwyLjAwMzkxIC0yLjAwMzkxLDIuMDAxOTUgNS4zMDI3Myw0LjE5MTQxIGMgNy42MzQ2OSw2LjAzNDg1IDE3LjU2Mzg2LDEwLjYwODU1IDI2LjkxOTkzLDEyLjQwMDM5IDEuMzc0OTksMC4yNjM0MyA2Ljk5OTk5LDAuMzU1ODggMTIuNSwwLjIwNTA4IDEyLjI3OTIzLC0wLjMzNjc2IDIxLjgwMTUyLC0zLjM3NzM4IDMxLjY0ODQzLC0xMC4xMDU0NyA4LjkwMzAyLC02LjA4MzE1IDkuNjAyNDQsLTYuOTgxOTYgNy4zNTU0NywtOS40NjQ4NSAtMC43NjQzNSwtMC44NDQ1OSAtMS4yMTQxMSwtMS4zMTUxOSAtMS44ODY3MiwtMS4yNSB6IG0gLTY2LjI2OTUzLC0xMS43OTQ5MiAtMS44MjgxMiwyLjAxOTUzIGMgLTEuNzcyODMsMS45NTg5NyAtMS43NzA2NiwyLjA4NTc1IDAuMDc2Miw0LjE1MDM5IDIuOTAwNDgsMy4yNDI2OSA4LjYwNDAzLDYuNTcyNTUgMTUuMDcwMzEsOC43OTY4OCAxMy44MjM3LDQuNzU1MjkgMzMuNjY4MzYsMC42NDA3MyA0Mi43ODEyNSwtOC44NzEwOSAyLjU0Nzg5LC0yLjY1OTQzIDIuNTU5OTUsLTIuNzM4NzYgMC42Njk5MiwtNC40NDkyMiAtMS44NDQ0NCwtMS42NjkxOSAtMi4xMTIwOSwtMS41OTY3NiAtNi40ODYzMiwxLjc0MjE4IC03LjY1NTcsNS44NDM2OCAtMTQuNjIzNTksNy45MDgwOCAtMjUuMTMwODYsNy40NDUzMiAtNy4zNDEwNiwtMC4zMjMzIC0xMC4wMTM4MiwtMC45MDY0NyAtMTQuNSwtMy4xNjYwMiAtMy4wMjQ5OSwtMS41MjM2IC02LjY1OTIzLC0zLjg3MTggLTguMDc2MTgsLTUuMjE4NzUgeiBtIDQzLjc1MzkxLC0xMS4zMDI3MyAtMy44MDA3OCwyLjYyMTA5IGMgLTcuNjkyMzIsNS4zMDI1NyAtMTcuNTkyMzYsNS4zOTA4NiAtMjUuNDQ1MzIsMC4yMjg1MiAtMy41ODg2MiwtMi4zNTkwNyAtMy42NzI2NSwtMi4zNjQ5NCAtNS4zODg2NywtMC40Njg3NSAtMi4yNDk4NywyLjQ4NjEgLTEuMDc2NTIsMy45ODExMiA1LjgxMjUsNy40MTQwNiA4Ljg1NTk3LDQuNDEzMTMgMjEuMzc3ODcsMy4wOTkzMiAyOS41LC0zLjA5NTcgbCAzLjQxNjAyLC0yLjYwNTQ3IC0yLjA0Njg4LC0yLjA0Njg4IHogbSAtMTEuNDA4MiwtMTEuMDEzNjcgYyAtMC41NzAxOSwtMC4wNjA0IC0xLjIwNzcsMC4zMDQ0NSAtMi4zNDM3NSwxLjA0ODgyIC0xLjk4MTM4LDEuMjk4MjcgLTIuOTA5MjQsMS4zNzU1OCAtNS4wMTk1NCwwLjQxNDA3IC0yLjE2NCwtMC45ODYwMSAtMi45MDkzMywtMC44OTA5IC00LjUzOTA2LDAuNTgzOTggLTEuOTI4NzMsMS43NDUzOSAtMS45MjYzLDEuNzgyNzcgMC4yNDAyNCwzLjUzNzExIDIuOTgyNjUsMi40MTUzMSAxMC4wNDIxOSwyLjM0NDg4IDEzLjA5OTYxLC0wLjEzMDg2IDIuMjk5MiwtMS44NjE3OSAyLjMxMDA1LC0xLjk1MTA4IDAuNSwtMy45NTExNyAtMC44NjU1LC0wLjk1NjM1IC0xLjM2NzMyLC0xLjQ0MTU2IC0xLjkzNzUsLTEuNTAxOTUgeiBtIC0zLjU2MjUsLTEzLjM2NzIzIGMgLTAuMzk5NjQsLTAuMDIxMyAtMC44NzkyMSwwLjA3NDggLTEuNDM3NSwwLjI4OTA2IC0xLjg1Mjk2LDAuNzExMDQgLTIuOTAyNTksNS42ODgzMiAtMS4zOTY0OSw2LjYxOTE0IDEuNzg0OTYsMS4xMDMxNyAzLjk4MzU1LC0wLjcxNTggNC4yODUxNiwtMy41NDI5NyAwLjIzMjM4LC0yLjE3OTczIC0wLjI1MjI2LC0zLjMwMTQ2IC0xLjQ1MTE3LC0zLjM2NTIzIHogbSAtMjcuODk4NDQsLTMuNjg5NDYgYyAyLjYyODAzLC0wLjEyMDQ0IDcuMzMzNTgsMS40Njg5NyA4LjQ5MDIzLDMuMDUwNzkgMi4wMzI3NSwyLjc3OTk1IDEuNjA5MTMsMTAuMDMxNTQgLTAuNzIyNjUsMTIuMzYzMjggLTEuMzMzMzEsMS4zMzMzNCAtMy4zMzMzMiwyIC02LDIgaCAtNCB2IC04LjQxNzk3IGMgMCwtNS44NDMwNyAwLjM4MjIyLC04LjU0NDkyIDEuMjUsLTguODM1OTQgMC4yNzQyMiwtMC4wOTIgMC42MDY5OCwtMC4xNDI5NSAwLjk4MjQyLC0wLjE2MDE2IHogbSA3NC40NDcyNiwtMC40NjY3OSBjIDAuODg4MjYsLTAuMDU0NSAxLjg3NTIsMC4wNTQyIDIuOTU4OTksMC4zMjYxNyA1LjM4NDczLDEuMzUxNDggNi43ODA5OSwxMi4yMjI2OCAyLjEyNjk1LDE2LjU1ODU5IC0yLjc4Njg3LDIuNTk2MzUgLTUuMDQyNjEsMi41MjI0IC04LjI5Mjk3LC0wLjI3MzQzIC0yLjE0Njc3LC0xLjg0NjU3IC0yLjYzODY3LC0zLjEzNTc3IC0yLjYzODY3LC02LjkxMDE2IDAsLTYuMTc5MTMgMS45OTY1OCwtOS40NjQ4NyA1Ljg0NTcsLTkuNzAxMTcgeiBtIC0xNDUuMzIyMjYyLC0wLjAxMTcgYyAwLjgwODE0NywwLjAyODUgMS43ODA5NCwwLjIxNjAxIDIuOTQxNDA2LDAuNTQ4ODMgMy40Mzk3NDgsMC45ODY0OSA0LjYwMTA0NSwzLjU1NDM1IDIuNjYyMTEsNS44OTA2MiAtMC42NzQyNjgsMC44MTI0OSAtMi45MTQyMzMsMS40NTMxMyAtNS4wODM5ODUsMS40NTMxMyAtMy43NzEzNjMsMCAtMy44NzY5NTMsLTAuMDk2NiAtMy44NzY5NTMsLTMuNTMxMjUgMCwtMy4xMDUxIDAuOTMyOTgyLC00LjQ0Njg1IDMuMzU3NDIyLC00LjM2MTMzIHogbSAxNzAuNDI5NjkyLC0wLjAzNTIgYyAxLjc0OTk3LC0wLjAzNDYgMy40NjAzMSwwLjU0MzUxIDQuNTQ2ODcsMS43NDQxNCAzLjYzNzA4LDQuMDE4OTYgMi44MDg5OSwxMy45NjY4NSAtMS4zNDc2NiwxNi4xOTE0MSAtMi45MjIyNSwxLjU2MzkzIC00Ljg4NjQxLDEuMTgxOTUgLTcuNTMxMjUsLTEuNDYyODkgLTMuMjUzODcsLTMuMjUzODggLTMuNTExNzMsLTExLjQ4ODI3IC0wLjQ1NTA3LC0xNC41NDQ5MyAxLjI0NjcxLC0xLjI0NjczIDMuMDM3MTMsLTEuODkzMTUgNC43ODcxMSwtMS45Mjc3MyB6IG0gMTkuNzEyODksLTIuMDcyMjcgYyAtNC44ODYyNSwwIC02LjU1NTUyLDAuMzMzODQgLTYuMjUzOTEsMS4yNSAwLjIyNjQzLDAuNjg3NSAxLjM4NzYyLDEuMzk0NTcgMi41ODIwMywxLjU3MDMxIDIuMDMxODQsMC4yOTkgMi4xNzE4OCwwLjg2MjIxIDIuMTcxODgsOC43NTAwMSAwLDguMzI1NzcgLTAuMDMxLDguNDI5NjggLTIuNSw4LjQyOTY4IC0xLjU4MDg3LDAgLTIuNSwwLjU2NDUgLTIuNSwxLjUzNTE1IDAsMS4yOTg3NiAxLjU3Nzk4LDEuNDkxMTQgMTAuMjUsMS4yNSBsIDEwLjI1LC0wLjI4NTE1IDAuMzA0NjgsLTQuNzUgYyAwLjI0MTMzLC0zLjc2MDY3IC0wLjAxOTEsLTQuNzUgLTEuMjUsLTQuNzUgLTEuMTEwMjcsMCAtMS41NTQ2OCwxLjAwMDc1IC0xLjU1NDY4LDMuNSB2IDMuNSBoIC01IC01IHYgLTguNDI5NjggYyAwLC02LjkwMTgyIDAuMTA4MTIsLTguMTk1NDEgMS40OTYwOSwtOC42MTEzMyAwLjE5ODI4LC0wLjA1OTQgMC40MjE3OSwtMC4xMDEzMSAwLjY3NTc4LC0wLjEzODY4IDEuMTk0NDEsLTAuMTc1NzQgMi4zNTc1OSwtMC44ODI4MSAyLjU4Mzk5LC0xLjU3MDMxIDAuMzAxNzIsLTAuOTE2MjcgLTEuMzY5NjUsLTEuMjUgLTYuMjU1ODYsLTEuMjUgeiBtIC02OC4wNjgzNiwwIGMgLTkuMDc5MDMsMCAtOS40MTQzMSwwLjA4MDMgLTkuOTk2MSwyLjM5ODQ0IC0wLjgyNzM3LDMuMjk2NDMgLTAuMTkwMDYsNi44NTk5NyAxLjMxNDQ2LDcuMzU1NDYgMC44NDQwNCwwLjI3Nzk2IDEuMjUsLTAuNzUyMjkgMS4yNSwtMy4xNzE4NyAwLC0zLjMxNDYgMC4yMjQ4LC0zLjU4MjAzIDMsLTMuNTgyMDMgaCAzIHYgOC41IGMgMCw4LjM5OTg1IC0wLjAyOTQsOC41IC0yLjUsOC41IC0xLjU1NTU4LDAgLTIuNSwwLjU2NjY1IC0yLjUsMS41IGggMC4wMDIgYyAwLDEuMTc5NDggMS4zODg4NywxLjUgNi41LDEuNSAxLjI3Nzc3LDAgMi4zMjI5MiwtMC4wMTk5IDMuMTcxODcsLTAuMDY4NCAyLjU0Njg4LC0wLjE0NTQzIDMuMzI4MTMsLTAuNTQ3MDMgMy4zMjgxMywtMS40MzE2NCAwLC0wLjkzMzM1IC0wLjk0NDQyLC0xLjUgLTIuNSwtMS41IC0yLjQ2OTc3LDAgLTIuNSwtMC4xIC0yLjUsLTguNSB2IC04LjUgaCAzIGMgMi43NjE4OSwwIDMsMC4yNzc3NyAzLDMuNSAwLDMuMzkzNjEgMS4yMTM0Niw0LjU3OTMyIDIuNTIxNDgsMi40NjI4OSAwLjM1MTA1LC0wLjU3MDE3IDAuMzM4ODMsLTIuODIwMiAtMC4wMjkzLC01IGwgLTAuNjY5OTIsLTMuOTYyODkgeiBtIC01MS4zNTM1MiwwIGMgLTYuNjQxMTIsMCAtOS4yNDQ5OCwxLjIzMTU5IC01LjU3ODEyLDIuNjM4NjcgMi4yMzEwNSwwLjg1NjE4IDIuMTc0NzksMTYuODg3NTUgLTAuMDYyNSwxNy43NDYwOSAtMC44NTk3MywwLjMyOTk2IC0xLjI4Mzg0LDEuMDUzNTQgLTAuOTQxNDEsMS42MDc0MyAwLjkzMzc3LDEuNTEwODYgMTEuMjA3NzgsMS4yMTE4IDE0LjM1OTM3LC0wLjQxNzk3IDMuNDgyMjcsLTEuODAwNzYgNS4xNDQ1NCwtNS40MjAyOSA1LjE0NDU0LC0xMS4xOTkyMiAwLC0zLjY3MzM2IC0wLjU1MTQ3LC01LjA4Mjc2IC0yLjkyMTg4LC03LjQ1MzEyIC0yLjY4MDAyLC0yLjY4MDA3IC0zLjUxMTQ2LC0yLjkyMTg4IC0xMCwtMi45MjE4OCB6IG0gLTIxLjA3ODEyLDAgYyAtNi4wODU1MywwIC04LjA2MTYzLDAuMzE4NTQgLTcuNzU1ODYsMS4yNSAwLjIyNTcxLDAuNjg3NSAxLjgzODg2LDEuMzkwMTYgMy41ODM5OCwxLjU2MjUgbCAzLjE3MTg4LDAuMzE0NDUgdiA4LjQzNTU1IDguNDM3NSBoIC0zLjUgYyAtMi4xMzg5LDAgLTMuMjEzNzYsMC4zNDYzNCAtMy40NDkyMiwxLjEzNDc2IC0wLjAzMzYsMC4xMTI2NCAtMC4wNTA4LDAuMjM0MjggLTAuMDUwOCwwLjM2NTI0IDAsMC45MDYxNSAwLjg3NDk5LDEuMjk2ODYgNC4wMzEyNSwxLjQzNTU0IDEuMDUyMDgsMC4wNDYyIDIuMzU3NjMsMC4wNjQ1IDMuOTY4NzUsMC4wNjQ1IDEuNjExMSwwIDIuOTE2NjcsLTAuMDE4MiAzLjk2ODc1LC0wLjA2NDUgMy4xNTYyNCwtMC4xMzg2NyA0LjAzMTI1LC0wLjUyOTMgNC4wMzEyNSwtMS40MzU1NCAwLC0wLjEyNTAxIC0wLjAxNTYsLTAuMjQyMTggLTAuMDQ2OSwtMC4zNTE1NiAtMC4yMTg3NSwtMC43NjU2NSAtMS4yMDMxMSwtMS4xNDg0NCAtMi45NTMxMiwtMS4xNDg0NCBoIC0zIHYgLTguNDMzNiBjIDAsLTguMzk1ODcgMC4wMTMsLTguNDM0NzggMi42NzM4MiwtOC43NDk5OSAxLjQ3MDA5LC0wLjE3NDAxIDIuODU2NCwtMC44Nzg5MSAzLjA4MjA0LC0xLjU2NjQxIDAuMzA1ODcsLTAuOTMxMzkgLTEuNjcwMywtMS4yNSAtNy43NTU4NiwtMS4yNSB6IG0gLTIzLjkzOTQ2LDAgYyAtNi4yNDQzNDMsMCAtMTAuMDYwNTQ0LDAuMzkxMDggLTEwLjA2MDU0NCwxLjAzMTI1IDAsMC41NjcyNyAwLjY3NTAwNSwxLjI5MDcgMS41LDEuNjA3NDIgMS4xNjg1MTcsMC40NDg0MSAxLjUsMi40MzA3NyAxLjUsOC45Njg3NiAwLDYuNzkzNzcgLTAuMjg1ODI3LDguMzkyNTcgLTEuNSw4LjM5MjU3IC0wLjcyMTg3MSwwIC0xLjMyODI2NywwLjUxNzMxIC0xLjQ2ODc1LDEuMTk5MjIgLTAuMDIwMDcsMC4wOTc0IC0wLjAzMTI1LDAuMTk3NjUgLTAuMDMxMjUsMC4zMDA3OCAwLDEuMTY2NjIgMS4zMzMzNDIsMS41IDYuMDAwMDA0LDEuNSAxLjE2NjY3LDAgMi4xMjQ5OSwtMC4wMjA4IDIuOTA2MjUsLTAuMDcwMyAyLjM0Mzc1LC0wLjE0ODQ0IDMuMDkzNzUsLTAuNTU0NjkgMy4wOTM3NSwtMS40Mjk2OSAwLC0wLjEyNTc4IC0wLjAxNTMsLTAuMjQzNyAtMC4wNDY5LC0wLjM1MzUyIC0wLjIyMDY3LC0wLjc2ODY0IC0xLjIxNTA0LC0xLjE0NjQ4IC0zLjAwOTc2LC0xLjE0NjQ4IC0wLjM3MjM0LDAgLTAuNjk5OTEsLTAuMDAzIC0wLjk4NjMzLC0wLjAxMzcgLTAuMjg2NDMsLTAuMDExMSAtMC41MzE3NiwtMC4wMzA5IC0wLjc0MjE5LC0wLjA2ODQgLTAuMjEwNDMsLTAuMDM3NSAtMC4zODQ5NiwtMC4wOTI3IC0wLjUyOTMsLTAuMTcxODkgLTAuNzIxNjgsLTAuMzk2MDEgLTAuNjc5NTEsLTEuNDA4MzcgLTAuNDkyMTgsLTMuOTk2MDggMC4yNTU3OSwtMy41MzU3NiAwLjY4NDk1LC00LjMwMzg2IDIuNTYwNTQsLTQuNTcwMzIgMS4zNTIyOCwtMC4xOTIwNCAyLjQ5NjEsMC4zMDgxOCAyLjg1NzQyLDEuMjUgMC4zMzEzOSwwLjg2MzU4IDEuMDA0OTUsMS41NzAzMiAxLjQ5NjEsMS41NzAzMiAxLjIyODQ2LDAgMS4xMzE5MiwtNi43MzQwNCAtMC4xMDc0MiwtNy41IC0wLjU1LC0wLjMzOTkzIC0xLDAuMDgzOSAtMSwwLjk0MTQgMCwwLjY2NiAtMC4zNzE2MSwxLjEwNzUgLTEuMTUwMzksMS4zNDU3MSAtMC4xNTU3NiwwLjA0NzYgLTAuMzI2OTUsMC4wODc3IC0wLjUxNTYzLDAuMTE5MTQgLTAuMzc3MzcsMC4wNjI5IC0wLjgyMTM3LDAuMDkzNyAtMS4zMzM5OCwwLjA5MzcgLTIuNjY2NjUsMCAtMywtMC4zMzMzMiAtMywtMyAwLC0yLjk2NTk5IDAuMDY0NSwtMy4wMDAwMSA1LjQzMTY0LC0zLjAwMDAxIDQuNjk0NDcsMCA1LjQ3MTc2LDAuMjc1ODggNS43NDgwNCwyLjAzOTA3IDAuNTQ4NzUsMy41MDI0OSAyLjMwNTQ1LDIuNjQyMDYgMi42MzA4NiwtMS4yODkwNyBsIDAuMzEwNTUsLTMuNzUgeiBNIDc1Ljc5ODgyOCwxMDIuMDQzIGMgLTIuNjM2NjcxLDAuMDcxNCAtNC42Mzg2NzIsMC40MDE2NCAtNC42Mzg2NzIsMS4wMzcxMSAwLDAuNTUgMC42NzQ5NjcsMSAxLjUsMSAxLjIyMDY3NCwwIDEuNSwxLjY1NDM3IDEuNSw4Ljg5MjU5IDAsNi45ODI0MSAtMC4zMjIyOTksOS4wMTY4MyAtMS41LDkuNDY4NzUgLTAuODI1MDMzLDAuMzE2NTcgLTEuNSwxLjA0MDE5IC0xLjUsMS42MDc0MiB2IDAuMDAyIGMgMCwxLjM2NTI0IDguNjk0MDk5LDEuMzMxMjMgOS41NDEwMTYsLTAuMDM5MSAwLjM2MzIxMiwtMC41ODc3MyAtMC4yODI3NjcsLTEuMzEyODggLTEuNDM5NDUzLC0xLjYxNTI0IC0xLjYxMjAwNywtMC40MjE1NCAtMi4xMDE1NjMsLTEuMzM3MjEgLTIuMTAxNTYzLC0zLjkzMzU5IDAsLTIuOTQyODUgMC4zMjYwMDQsLTMuMzgyODIgMi41MDE5NTMsLTMuMzgyODIgMS44NTYzNTMsMCAzLjQyODE2MywxLjI4OTcxIDYuMDkzNzUsNSAzLjUwMzQ3MSw0Ljg3NjYxIDcuNDA0Mjk3LDYuNzIwNTMgNy40MDQyOTcsMy41IDAsLTAuODI1MDIgLTAuNTYyNDY2LC0xLjUwNjExIC0xLjI1LC0xLjUxMzY3IC0wLjY4NzQ5NiwtMC4wMDcgLTIuMjk2Njg4LC0xLjYyNzA3IC0zLjU3NjE3MiwtMy42MDE1NyBsIC0yLjMyNjE3MiwtMy41ODk4MyAyLjA3NjE3MiwtMS40NTUwOCBjIDIuOTE5NDU5LC0yLjA0NDk1IDIuODM0ODA3LC03LjY5NTAyIC0wLjE0NjQ4NCwtOS43ODMyMSAtMS41ODczMDcsLTEuMTExNzcgLTcuNzQ0MjIsLTEuNzEyNzEgLTEyLjEzODY3MiwtMS41OTM3NSB6IG0gMTc1LjEzMDg2MiwtMC41OTE3OSBjIC00LjE3MTE1LC0wLjAzMzcgLTguMjU1NjEsMi41NDE3OSAtOS43NjU2Myw3LjExNzE5IC0xLjU1MDM2LDQuNjk3NzMgLTAuNTgxNzQsOS42NzE0MSAyLjYyNSwxMy40ODI0MiAyLjA1MDk2LDIuNDM3NDIgMy4zMjU3MiwzLjAyOTMgNi41MjUzOSwzLjAyOTMgMi4xODcyNSwwIDQuODQyMjQsLTAuNDYyOTcgNS45MDAzOSwtMS4wMjkzIDUuNDc5MywtMi45MzI0MiA2LjU1ODI5LC0xNC44MTI4NSAxLjc3OTMsLTE5LjU5MTc5IC0yLjAyODkxLC0yLjAyODkyIC00LjU2MTc3LC0yLjk4NzYyIC03LjA2NDQ1LC0zLjAwNzgyIHogbSAtMjQuNjA3NDIsLTAuMjY1NjIgYyAtMS40NjczMSwwLjA2NjIgLTIuOTMxOTYsMC42NzU1OSAtNC44NTc0MywxLjg0OTYxIC02LjAyMDg2LDMuNjcxMTYgLTYuOTA5NDUsMTQuMTY2NzIgLTEuNjQ0NTMsMTkuNDMxNjQgMi44MTc2NCwyLjgxNzYzIDguNjg2NDQsMy41Njg1IDEyLjM5NDUzLDEuNTgzOTggNi45NTg0OSwtMy43MjQwNCA2LjI5NDg5LC0xNy42NzE2MiAtMS4wMjE0OCwtMjEuNDU1MDggLTEuOTMzNTcsLTAuOTk5ODcgLTMuNDAzNzksLTEuNDc2MzYgLTQuODcxMDksLTEuNDEwMTUgeiBtIC00Ny40OTgwNSwtNi4wNjY0NDkgYyAtMi42Nzk4MiwwLjA3MDk0IC01LjM2MDM3LDAuNzAzNTk2IC02Ljc5NDkyLDEuODY1MjM0IC0wLjI4NzQsMC4yMzI3MiAtMC41MzkwNSwwLjQzODUzNCAtMC43NTU4NiwwLjYyMzA0NyAtMC4yMTY4MSwwLjE4NDUxMyAtMC4zOTg4MywwLjM0OTMwMyAtMC41NDY4OCwwLjUgLTAuODg4MjgsMC45MDQxODMgLTAuNTU0OCwxLjMyODA4NyAwLjgwMjc0LDIuODI4MTI4IDEuNzMwOTgsMS45MTI3NCAyLjAxMTA2LDEuOTQxODggNC4yODMyLDAuNDUzMTIgMS45OTQ3NiwtMS4zMDcwMyAyLjkwMTEsLTEuMzc2NjggNS4wNTY2NCwtMC4zOTQ1MyAyLjI2NTE4LDEuMDMyMDggMi45MDcwOSwwLjkxNTE4IDQuNjY3OTcsLTAuODQ1NyAyLjAyMzc1LC0yLjAyMzU5OSAyLjAyMzczLC0yLjA1NTI0NSAwLjA4MiwtMy41MjM0NCAtMS40MzU4LC0xLjA4NTU5NCAtNC4xMTUxLC0xLjU3NjgwMSAtNi43OTQ5MiwtMS41MDU4NTkgeiBtIDAuMzI2MTcsLTE2LjA5MTc5NyBjIC00LjAzMTMzLDAuMDAzMiAtOC4wNjAxMiwwLjgxMDc1NyAtMTEuNDkwMjMsMi40MjE4NzUgLTYuNTEyMDMsMy4wNTg3MDUgLTkuMjUyMTUsNi4wMTgzMjcgLTcuNTE1NjMsOC4xMTMyODEgMS40NDc1OSwxLjc0MzIzOSAzLjYxMDQxLDEuOTgyNDU2IDQuNTI1MzksMC41MDE5NTMgMC4xNzIzOSwtMC4yNzg5MjkgMC43ODc5NSwtMC43NjYyNTEgMS42NDI1OCwtMS4zMjgxMjUgMC40MjczMSwtMC4yODA5MzcgMC45MTUwMywtMC41ODAwNDMgMS40MzU1NSwtMC44ODA4NTkgMC41MjA1MSwtMC4zMDA4MTYgMS4wNzQ1NywtMC42MDM4MzUgMS42MzY3MiwtMC44OTA2MjUgNy4yMTU4MywtMy42ODEyMjIgMTcuOTIwMTYsLTIuNDUxNjAyIDIzLjg2MzI4LDIuNzQyMTg3IDEuMzcwMywxLjE5NzU0NCAxLjgzNDgzLDEuMTE1NDAyIDMuMzg4NjcsLTAuNjAxNTYyIDIuMzUzOTYsLTIuNjAxMTA5IDAuODk2OTIsLTQuNDcxMjcxIC01Ljk3NjU2LC03LjY3NTc4MSAtMy40NDQ1NywtMS42MDUxNjYgLTcuNDc4NDQsLTIuNDA1NTggLTExLjUwOTc3LC0yLjQwMjM0NCB6IG0gLTAuMjI0MzgsLTE1LjkyNTc4MiBjIC0xMC4yMDc4NiwwLjA2NDM5IC0yMC40Mzk1MywzLjYyNTYwNCAtMjguNzIwNywxMC41OTM3NSAtMi45NzQzNCwyLjUwMjcyOCAtMy4wNDQ1MiwyLjcyNzYwNSAtMS40MzE2NCw0LjUwOTc2NiAwLjkzMzUsMS4wMzE1NDcgMS45MDA1LDEuODc1IDIuMTQ4NDQsMS44NzUgMC4yNDgxMiwwIDIuMjM1LC0xLjQxMzIzIDQuNDE2MDEsLTMuMTQwNjI1IDEyLjk4NjM4LC0xMC4yODU0MTcgMzMuNzQwODksLTEwLjY4NzM4NyA0NS45MzE2NCwtMC44OTA2MjUgNC40Mjc0OSwzLjU1ODA0NyA1LjAyMDcyLDMuNjUwMTI5IDcuMjk4ODMsMS4xMzI4MTMgMS42NTIwMywtMS44MjU0NzQgMS40OTY2OSwtMi4wNTkwOSAtNC4wMzEyNSwtNi4wMTc1NzkgLTcuNjE0ODcsLTUuNDUyODgzIC0xNi42MDQzOSwtOC4xMTkzMTQgLTI1LjYxMTMzLC04LjA2MjUgeiBtIDEuNjM4NjgsLTE1Ljk1MzEyNCBjIC0xNC42MjEyOSwtMC4wMDMgLTMwLjQ5MTc5LDUuMzkwNTIzIC00MC44MTQ0NSwxNC40Nzg1MTUgLTMuODE4LDMuMzYxMzIzIC0zLjg2ODA0LDMuNDg4ODY2IC0yLjA5NTcsNS40NDcyNjYgMC45OTgyOCwxLjEwMzA5MyAyLjAxNDc5LDIuMDA1ODU5IDIuMjU3ODEsMi4wMDU4NTkgMC4yNDI4NywwIDIuMzc4MTgsLTEuNzA0NzI5IDQuNzQ2MDksLTMuNzg5MDYyIDguNzgyMzQsLTcuNzMwNTMzIDIxLjY0NTI3LC0xMi4yMTgxMTcgMzQuOTYyODksLTEyLjE5OTIxOSAxMi43MTgwOCwwLjAxODc4IDIzLjg5Mjg5LDMuOTM5MTA3IDMzLjM3NSwxMS43MDg5ODQgNC4zMzAxMywzLjU0ODIyMSA0LjMzODI4LDMuNTUwMzkzIDYuMzI4MTMsMS41NjA1NDcgMS45ODk4OCwtMS45ODk4ODMgMS45ODYzMywtMS45OTU5NDIgLTIuMzM1OTQsLTUuNzI2NTYyIC01LjgwODQxLC01LjAxMzM5MyAtMTYuMzQ3NTIsLTEwLjIzMzE4IC0yNC41ODM5OCwtMTIuMTc1NzgyIC0zLjc0ODg2LC0wLjg4NDE3NCAtNy43NDU4OCwtMS4zMDk3MDYgLTExLjgzOTg1LC0xLjMxMDU0NiB6IG0gLTEuNTUyNzMsLTE1LjkwMjM0NCBjIC0xMC43MTM4MywwLjA0MDk4IC0yMS41MjcwNSwyLjMwNjg4NyAtMzEuNjYyMTEsNi45MDIzNDQgLTYuNjU3MjYsMy4wMTg1MTkgLTE3LjMxNjQ1LDEwLjE2OTY2NSAtMjAuNTkzNzUsMTMuODE0NDUzIC0xLjgxNDEsMi4wMTc1NDkgLTEuODIxNDcsMi4yMDk0MDYgLTAuMTYyMTEsNC4wNDI5NjggMS43MDM1OCwxLjg4MjQzMiAxLjg3OTQzLDEuODE0MTg4IDcuOTA0MywtMy4wNTY2NCAyNS44MTI4MSwtMjAuODY4Mzk3IDYzLjc4MjM0LC0yMS4wNTQwNTQgODguNjQ0NTMsLTAuNDMzNTk0IGwgNS40ODA0Nyw0LjU0Njg3NSAyLjAxOTUzLC0yLjA0Njg3NSAyLjAxNzU4LC0yLjA0ODgyOCAtNC41LC0zLjg3MzA0NyBDIDIxNC40NDk0NSwzNy4yODk5MDcgMTk2Ljg2ODExLDMxLjE3Nzc5NiAxNzkuMDExNzIsMzEuMjQ2MDk0IFoiIC8+CiAgPC9nPgo8L3N2Zz4K'><br><i>"
-    "Forked by Raik Schneider aka Einstein2150<br>"
+    "<img src=\"data:image/png;base64,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\" /><br>"
+    //"File System Info Calculated in Bytes<br>"
+    //"<b>Total:</b> ")+total+" <b>Free:</b> "+freespace+" "+" <b>Used:</b> "+used+F("<br>-----<br>"
+    //"<a href=\"/status\">Device and Wiring Status</a><br>-<br>"
+    "<br>"
+    "<strong>Main-Functions</strong><br>"
+    "<button onclick=\"window.location.href='/logs'\">LOG + AUTOREPLAY</button>"
+    "<button onclick=\"window.location.href='/keypad'\">Keypad</button>"
+    "<button onclick=\"window.location.href='/experimental'\">Manual Mode</button>"
+    "<br>"
+    "<strong>Setup and Configuration</strong><br>"
+    "<button onclick=\"window.location.href='/status'\">Device and Wiring Status</button>"
+    "<button onclick=\"window.location.href='/data-convert'\">Data Conversion Tools</button>"
+    "<button onclick=\"window.location.href='/settings'\">Configure Settings</button>"
+    "<button onclick=\"window.location.href='/format'\">Format File System</button>"
+    "<button onclick=\"window.location.href='/firmware'\">Upgrade Firmware</button>"
+    "<br>"
+    "<strong>Help</strong><br>"
+    "<button onclick=\"window.location.href='/api/help'\">API Info</button>"
+    "<button onclick=\"window.location.href='/help'\">Help</button>"
+    "<br>"
+    "Raik Schneider (Einstein2150)<br>"
     "<a href=\"https://github.com/Einstein2150\">https://github.com/Einstein2150</a><br>"
     "<br>"
     "Original Software created by Corey Harding<br>"
@@ -1315,18 +1379,6 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     //"www.RFID-Tool.com<br>"
     //"www.LegacySecurityGroup.com / www.Exploit.Agency</i><br>"
     //"-----<br>"
-    //"File System Info Calculated in Bytes<br>"
-    //"<b>Total:</b> ")+total+" <b>Free:</b> "+freespace+" "+" <b>Used:</b> "+used+F("<br>-----<br>"
-    //"<a href=\"/status\">Device and Wiring Status</a><br>-<br>"
-    "<button onclick=\"window.location.href='/status'\">Device and Wiring Status</button>"
-    "<button onclick=\"window.location.href='/logs'\">List Exfiltrated Data</button>"
-    "<button onclick=\"window.location.href='/experimental'\">TX Mode</button>"
-    "<button onclick=\"window.location.href='/data-convert'\">Data Conversion Tools</button>"
-    "<button onclick=\"window.location.href='/settings'\">Configure Settings</button>"
-    "<button onclick=\"window.location.href='/format'\">Format File System</button>"
-    "<button onclick=\"window.location.href='/firmware'\">Upgrade Firmware</button>"
-    "<button onclick=\"window.location.href='/api/help'\">API Info</button>"
-    "<button onclick=\"window.location.href='/help'\">Help</button>"
     "</body></html>"));
   });
 
@@ -1394,6 +1446,55 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
   });
   
   server.on("/settings", handleSettings);
+
+
+server.on("/keypad", []() {
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server.sendHeader("Pragma", "no-cache");
+  server.sendHeader("Expires", "-1");
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, "text/html",
+    String()+F("<!DOCTYPE HTML><html>")
+    + css("ESP-RFID-Tool-v2 - Keypad")
+    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
+  );
+  // --- STYLE ---
+  server.sendContent(F(
+    "<style>"
+    ".keypad { display: grid; grid-template-columns: repeat(3, 60px); gap: 10px; margin-top:10px; }"
+    ".key { width: 60px; height: 60px; font-size: 24px; }"
+    "</style>"
+  ));
+  // --- TITLE ---
+  server.sendContent(F("<b>Transmit PIN via Keypad:</b><br><br>"));
+  // --- BIT SELECTOR ---
+  server.sendContent(F(
+    "<label><input type='radio' name='pinbits' value='4' checked onclick='setBits(4)'> 4‑bit</label> "
+    "<label><input type='radio' name='pinbits' value='8' onclick='setBits(8)'> 8‑bit</label><br><br>"
+  ));
+  // --- KEYPAD ---
+  server.sendContent(F("<div class='keypad'>"));
+  const char* keys[] = {"1","2","3","4","5","6","7","8","9","*","0","#"};
+  for (int i = 0; i < 12; i++) {
+    server.sendContent(
+      String()+"<button class='key' onclick=\"sendKey('"+keys[i]+"')\">"+keys[i]+"</button>"
+    );
+  }
+  server.sendContent(F("</div>"));
+  // --- JAVASCRIPT ---
+  server.sendContent(F(
+    "<script>"
+    "let pinbits = 4;"
+    "function setBits(b){ pinbits = b; }"
+    "function sendKey(k){"
+    "  fetch('/api/pininstant?key=' + encodeURIComponent(k) + '&bits=' + pinbits);"
+    "}"
+    "</script>"
+  ));
+  server.sendContent(F("</body></html>"));
+});
+
+
 
   server.on("/firmware", [](){
     server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Firmware")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>Open Arduino IDE.<br>Pull down \"Sketch\" Menu then select \"Export Compiled Binary\".<br>On this page click \"Browse\", select the binary you exported earlier, then click \"Update\".<br>You may need to manually reboot the device to reconnect.<br><iframe style =\"border: 0; height: 100%;\" src=\"http://")+local_IPstr+F(":1337/update\"><a href=\"http://")+local_IPstr+F(":1337/update\">Click here to Upload Firmware</a></iframe></body></html>"));
@@ -1559,7 +1660,6 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     
     server.send(200, "text/html", String()+F(
       "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Conversion Tool")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
- //     "<a href=\"/\"><- BACK TO INDEX</a><br><br>")
       +dataCONVERSION+
       F(
       "<hr>"
@@ -1704,134 +1804,11 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
           pinHTML=pinHTML+bruteENDchar;
         }
           
-        for (int i=0; i<=pinHTML.length(); i++) {
-          if (pinHTML.charAt(i) == '0') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0000");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"11110000");
-            }
-          }
-          else if (pinHTML.charAt(i) == '1') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0001");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"11100001");
-            }
-          }
-          else if (pinHTML.charAt(i) == '2') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0010");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"11010010");
-            }
-          }
-          else if (pinHTML.charAt(i) == '3') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0011");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"11000011");
-            }
-          }
-          else if (pinHTML.charAt(i) == '4') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0100");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"10110100");
-            }
-          }
-          else if (pinHTML.charAt(i) == '5') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0101");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"10100101");
-            }
-          }
-          else if (pinHTML.charAt(i) == '6') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0110");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"10010110");
-            }
-          }
-          else if (pinHTML.charAt(i) == '7') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"0111");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"10000111");
-            }
-          }
-          else if (pinHTML.charAt(i) == '8') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1000");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"01111000");
-            }
-          }
-          else if (pinHTML.charAt(i) == '9') {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1001");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"01101001");
-            }
-          }
-          else if ((pinHTML.charAt(i) == '*')||(pinHTML.charAt(i) == 'A')) {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1010");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"01011010");
-            }
-          }
-          else if ((pinHTML.charAt(i) == '#')||(pinHTML.charAt(i) == 'B')) {
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1011");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"01001011");
-            }
-          }
-          else if (pinHTML.charAt(i) == 'C') { //F1
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1100");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"00111100");
-            }
-          }
-          else if (pinHTML.charAt(i) == 'D') { //F2
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1101");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"00101101");
-            }
-          }
-          else if (pinHTML.charAt(i) == 'E') { //F3
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1110");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"00011110");
-            }
-          }
-          else if (pinHTML.charAt(i) == 'F') { //F4
-            if (pinBITS==4) {
-              pinSEND(pinHTMLDELAY,"1111");
-            }
-            else if (pinBITS==8) {
-              pinSEND(pinHTMLDELAY,"00001111");
-            }
+        for (int i = 0; i < pinHTML.length(); i++) {
+          char key = pinHTML.charAt(i);
+          String bits = mapKeyToBits(key, pinBITS);
+          if (bits != "") {
+            pinSEND(pinHTMLDELAY, bits);
           }
         }
 
@@ -2123,7 +2100,7 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     server.send(200, "text/html", 
       String()+
       F(
-      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Manual Mode (Transmitting)")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
       //"<!DOCTYPE HTML>"
       //"<html>"
       //"<head>"

@@ -48,6 +48,7 @@ void apiTXinstant(String apiBIN, int apipulsewidth, int apidatainterval, int wai
     "<html><body><script>history.back();</script></body></html>");
 }
 
+
 void apiTX(String apiBIN, int apipulsewidth, int apidatainterval, int wait) {
   wg.pause();
       digitalWrite(DATA0, HIGH);

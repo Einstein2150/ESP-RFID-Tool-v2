@@ -69,7 +69,6 @@ server.on("/api/txinstant/bin", []() {
   int api_pulsewidth = txdelayus;
   int api_datainterval = (txdelayms * 1000);
   int api_wait = 100000;
-
   if (server.hasArg("binary")) {
     api_binary = server.arg("binary");
   }
@@ -82,13 +81,29 @@ server.on("/api/txinstant/bin", []() {
   if (server.hasArg("wait")) {
     api_wait = server.arg("wait").toInt();
   }
-
-  // Bits senden
   apiTX(api_binary, api_pulsewidth, api_datainterval, api_wait);
-
-  // Sofortige Antwort ohne JSON → zurück zur vorherigen Seite
   server.send(200, "text/html",
     "<html><body><script>history.back();</script></body></html>");
+});
+
+server.on("/api/pininstant", []() {
+    if (!server.hasArg("key")) {
+        server.send(400, "text/plain", "Missing key");
+        return;
+    }
+    char key = server.arg("key")[0];
+    int bits = 4;
+    if (server.hasArg("bits")) {
+        bits = server.arg("bits").toInt();
+    }
+    // Mapping 
+    String bin = mapKeyToBits(key, bits);
+    if (bin == "") {
+        server.send(400, "text/plain", "Invalid key");
+        return;
+    }
+    // Send
+    apiTXinstant(bin, 40, 2000, 100000);
 });
 
 
