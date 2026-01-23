@@ -106,6 +106,30 @@ server.on("/api/pininstant", []() {
     apiTXinstant(bin, 40, 2000, 100000);
 });
 
+server.on("/api/wiegandencode", []() {
+    if (!server.hasArg("uid") || !server.hasArg("format")) {
+        server.send(400, "text/plain", "Missing uid or format");
+        return;
+    }
+    String uid = server.arg("uid");
+    int format = server.arg("format").toInt();
+    String bin;
+    if (format == 32) {
+        bin = makeWiegand32(uid);
+    }
+    else if (format == 34) {
+        bin = makeWiegand34(uid);
+    }
+    else if (format == 35) {
+        bin = makeWiegand35(uid);
+    }
+    else {
+        server.send(400, "text/plain", "Unsupported format");
+        return;
+    }
+    apiTXinstant(bin, 40, 2000, 100000);
+});
+
 
 server.on("/api/help", [](){
   String apihelpHTML=String()+F(

@@ -115,3 +115,128 @@ String sanitizeString(char* buffer, int length) {
   }
   return result;
 }
+
+
+
+String hexToBin(String hex) {
+    String out = "";
+    for (int i = 0; i < hex.length(); i++) {
+        char c = hex.charAt(i);
+        uint8_t v = strtoul(String(c).c_str(), NULL, 16);
+        for (int b = 3; b >= 0; b--) {
+            out += ((v >> b) & 1) ? '1' : '0';
+        }
+    }
+    return out;
+}
+
+int parityEven(String bits) {
+    int c = 0;
+    for (int i = 0; i < bits.length(); i++)
+        if (bits[i] == '1') c++;
+    return (c % 2 == 0) ? 0 : 1;
+}
+
+int parityOdd(String bits) {
+    return parityEven(bits) ? 0 : 1;
+}
+
+
+String reverseBits(String in) {
+    String out = "";
+    for (int i = in.length() - 1; i >= 0; i--) out += in[i];
+    return out;
+}
+
+
+String makeWiegand32(String uidHex) {
+
+    // 1. UID als 32-Bit Zahl
+    uint32_t uid = strtoul(uidHex.c_str(), NULL, 16);
+
+    // 2. Byte-Swap rückwärts (damit Decoder wieder zurückswappt)
+    uint32_t swapped =
+        ((uid & 0x000000FF) << 24) |
+        ((uid & 0x0000FF00) << 8)  |
+        ((uid & 0x00FF0000) >> 8)  |
+        ((uid & 0xFF000000) >> 24);
+
+    // 3. wieder in HEX
+    char buf[20];
+    sprintf(buf, "%08X", swapped);
+
+    // 4. in BIN (MSB-first)
+    String bin = hexToBin(String(buf));
+
+    return bin; // 32 Bits
+}
+
+
+
+
+String makeWiegand34(String uidHex) {
+
+    // 1. UID → BIN (MSB-first)
+    String uidBin = hexToBin(uidHex);
+
+    while (uidBin.length() < 32)
+        uidBin = "0" + uidBin;
+
+    // 2. Byte-Swap rückwärts (damit Decoder wieder zurückswappt)
+    uint32_t uid = strtoul(uidHex.c_str(), NULL, 16);
+
+    uint32_t swapped =
+        ((uid & 0x000000FF) << 24) |
+        ((uid & 0x0000FF00) << 8)  |
+        ((uid & 0x00FF0000) >> 8)  |
+        ((uid & 0xFF000000) >> 24);
+
+    // 3. swapped UID wieder in BIN
+    char buf[20];
+    sprintf(buf, "%08X", swapped);
+    String swappedHex = String(buf);
+
+    String swappedBin = hexToBin(swappedHex);
+
+    // 4. Parity über ORIGINAL (swapped) Bits
+    String left  = swappedBin.substring(0, 16);
+    String right = swappedBin.substring(16, 32);
+
+    int p1 = parityEven(left);
+    int p2 = parityOdd(right);
+
+    // 5. Wiegand-34 zusammenbauen
+    return String(p1) + swappedBin + String(p2);
+}
+
+
+String makeWiegand35(String uidHex) {
+
+    // 1. UID als 32-Bit Zahl
+    uint32_t uid = strtoul(uidHex.c_str(), NULL, 16);
+
+    // 2. Byte-Swap rückwärts
+    uint32_t swapped =
+        ((uid & 0x000000FF) << 24) |
+        ((uid & 0x0000FF00) << 8)  |
+        ((uid & 0x00FF0000) >> 8)  |
+        ((uid & 0xFF000000) >> 24);
+
+    // 3. swapped UID → HEX
+    char buf[20];
+    sprintf(buf, "%08X", swapped);
+
+    // 4. → BIN (MSB-first)
+    String swappedBin = hexToBin(String(buf));
+
+    // 5. Facility/Card nach HID Corporate 1000-35
+    String facility = swappedBin.substring(0, 19);
+    String card     = swappedBin.substring(19, 32);
+
+    // 6. Paritybits
+    int p1 = parityEven(facility);
+    int p2 = parityOdd(card);
+
+    // 7. Wiegand-35 zusammenbauen
+    return String(p1) + facility + card + String(p2);
+}

@@ -1358,6 +1358,7 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     "<strong>Main-Functions</strong><br>"
     "<button onclick=\"window.location.href='/logs'\">LOG + AUTOREPLAY</button>"
     "<button onclick=\"window.location.href='/keypad'\">Keypad</button>"
+    "<button onclick=\"window.location.href='/wiegand'\">Cardpad</button>"
     "<button onclick=\"window.location.href='/experimental'\">Manual Mode</button>"
     "<br>"
     "<strong>Setup and Configuration</strong><br>"
@@ -1494,6 +1495,58 @@ server.on("/keypad", []() {
   server.sendContent(F("</body></html>"));
 });
 
+
+server.on("/wiegand", []() {
+  server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  server.sendHeader("Pragma", "no-cache");
+  server.sendHeader("Expires", "-1");
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, "text/html",
+    String()+F("<!DOCTYPE HTML><html>")
+    + css("ESP-RFID-Tool-v2 - Wiegand Encoder")
+    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
+  );
+  // --- STYLE ---
+  server.sendContent(F(
+    "<style>"
+    "input { width: 200px; height: 30px; font-size: 18px; margin-top: 10px; }"
+    "select { width: 120px; height: 30px; font-size: 18px; margin-top: 10px; }"
+    "button.send { width: 200px; height: 40px; font-size: 20px; margin-top: 20px; }"
+    "</style>"
+  ));
+  // --- TITLE ---
+  server.sendContent(F("<b>Wiegand UID Encoder</b><br><br>"));
+  // --- UID INPUT ---
+  server.sendContent(F(
+    "UID (HEX):<br>"
+    "<input id='uid' type='text' placeholder='e.g. 1A2B3C4D'><br><br>"
+  ));
+  // --- FORMAT SELECTOR ---
+  server.sendContent(F(
+    "Format:<br>"
+    "<select id='format'>"
+    "<option value='32'>Wiegand 32</option>"
+    "<option value='34'>Wiegand 34</option>"
+    "<option value='35'>Wiegand 35</option>"
+    "</select><br><br>"
+  ));
+  // --- SEND BUTTON ---
+  server.sendContent(F(
+    "<button class='send' onclick='sendWiegand()'>SEND</button>"
+  ));
+  // --- JAVASCRIPT ---
+  server.sendContent(F(
+    "<script>"
+    "function sendWiegand(){"
+    "  let uid = document.getElementById(\"uid\").value;"
+    "  let format = document.getElementById(\"format\").value;"
+    "  if(uid.length == 0){ alert(\"Please enter UID\"); return; }"
+    "  fetch('/api/wiegandencode?uid=' + encodeURIComponent(uid) + '&format=' + format);"
+    "}"
+    "</script>"
+  ));
+  server.sendContent(F("</body></html>"));
+});
 
 
   server.on("/firmware", [](){
