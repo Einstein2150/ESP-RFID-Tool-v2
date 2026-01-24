@@ -39,6 +39,7 @@
 #include "version.h"
 #include "strrev.h"
 #include "aba2str.h"
+#include "api_server.h"
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -154,7 +155,7 @@ String mapKeyToBits(char key, int bits) {
     return "";
 }
 
-String mapBitsToKey(uint8_t bits) {
+String mapBitsToKey(uint8_t bits, uint8_t rawByte) {
     switch (bits) {
         // 0
         case 0b00000000: return "0";   // 4-bit
@@ -204,6 +205,28 @@ String mapBitsToKey(uint8_t bits) {
         // F4
         case 0b00001111: return "F4"; // beide identisch → aber korrekt, da 8-bit Code = 00001111
     }
+    
+    uint8_t key = rawByte & 0x0F;
+
+    switch (key) {
+        case 0x0: return "0";
+        case 0x1: return "1";
+        case 0x2: return "2";
+        case 0x3: return "3";
+        case 0x4: return "4";
+        case 0x5: return "5";
+        case 0x6: return "6";
+        case 0x7: return "7";
+        case 0x8: return "8";
+        case 0x9: return "9";
+        case 0xA: return "*";
+        case 0xB: return "#";
+        case 0xC: return "F1";
+        case 0xD: return "F2";
+        case 0xE: return "F3";
+        case 0xF: return "F4";
+    }
+
     return "?";
 }
 
@@ -229,6 +252,8 @@ void LogWiegand(WiegandNG &tempwg) {
   binChunk2exists=false;
   int binChunk2len=0;
   int j=0;
+
+  uint8_t rawByte = binChunk1;
   
   for (unsigned int i=bufferSize-countedBytes; i< bufferSize;i++) {
     unsigned char bufByte=buffer[i];
@@ -664,14 +689,16 @@ void LogWiegand(WiegandNG &tempwg) {
     f.print("<br>");
     
     f.print("<button onclick=\"window.location.href='/api/txinstant/bin?binary=");
-    f.print(cardBinReplay);
+    //f.print(cardBinReplay);
+    f.print(newBitstream);
     f.print("&pulsewidth=40&interval=2000&wait=100000&prettify=1'\" style=\"width: 200px; height: 25px;\" >Replay</button>");
     f.print("<br>");  
   }
   
   else if (countedBits == 4 || countedBits == 8) {
     f.print(",Keypad Code:");
-    f.print(mapBitsToKey(binChunk1));
+    f.print(mapBitsToKey(binChunk1, binChunk1));
+
     f.print(",HEX:");
     if (countedBits == 8) {
         char hexCHAR[3];
@@ -1264,6 +1291,25 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
 
     // Buffergröße holen
     unsigned int bufferSize = wg.getBufferSize();
+
+for (int i = 0; i < bufferSize; i++) {
+    char buf[4];
+    sprintf(buf, "%02X", data[i]);
+    Serial.print(buf);
+    Serial.print(" ");
+}
+Serial.println();
+
+// 2. Bit-Dump des kompletten Buffers
+for (int byte = 0; byte < bufferSize; byte++) {
+    for (int bit = 7; bit >= 0; bit--) {
+        Serial.print((data[byte] >> bit) & 1);
+    }
+    Serial.print(" ");
+}
+Serial.println();
+Serial.println("========================");
+    
     int countedBytes = (bits + 7) / 8;
     int offset = bufferSize - countedBytes;
 
@@ -1315,12 +1361,53 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
         }
         newUIDFormat = "Wiegand 35 (UID32 Little-Endian)";
     }
+else if (bits == 8) {
+    // Key liegt im letzten Byte des Buffers
+    unsigned int bufferSize = wg.getBufferSize();
+    uint8_t rawByte = data[bufferSize - 1];
+
+    // Bitstream nur für Anzeige
+    String realBits = "";
+    for (int i = 7; i >= 0; i--) {
+        realBits += ((rawByte >> i) & 1) ? '1' : '0';
+    }
+    newBitstream = realBits;
+
+    // Taste über dein zentrales Mapping
+    newUIDHex   = mapBitsToKey(rawByte, rawByte);
+    newUIDFormat = "Keypad 8-bit";
+
+    Serial.print("KEYPAD 8-bit: ");
+    Serial.println(newUIDHex);
+    return;
+}
+
+else if (bits == 4) {
+    unsigned int bufferSize = wg.getBufferSize();
+    uint8_t rawByte = data[bufferSize - 1];
+
+    String realBits = "";
+    for (int i = 3; i >= 0; i--) {
+        realBits += ((rawByte >> i) & 1) ? '1' : '0';
+    }
+    newBitstream = realBits;
+
+    newUIDHex    = mapBitsToKey(rawByte, rawByte);
+    newUIDFormat = "Keypad 4-bit";
+
+    Serial.print("KEYPAD 4-bit: ");
+    Serial.println(newUIDHex);
+    return;
+}
+
+
     else {
         newUIDHex = "UNKNOWN";
         newUIDFormat = "Unsupported (" + String(bits) + " bits)";
         Serial.println("Unsupported bit length");
         return;
     }
+
 
     // --- 3. Little-Endian konvertieren ---
     uint32_t uid =
@@ -1339,6 +1426,7 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
 });
 
 
+
 //Set up Web Pages
   server.on("/",[]() {
   /*  FSInfo fs_info;
@@ -1354,6 +1442,14 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     //"File System Info Calculated in Bytes<br>"
     //"<b>Total:</b> ")+total+" <b>Free:</b> "+freespace+" "+" <b>Used:</b> "+used+F("<br>-----<br>"
     //"<a href=\"/status\">Device and Wiring Status</a><br>-<br>"
+    "<br>"
+    "<div id=\"livebox\" style=\"padding:10px; border:1px solid #ccc; margin-top:20px;\">"
+    "<b>Last Event:</b><br>"
+    "Bits: <span id=\"liveBits\"></span><br>"
+    "Format: <span id=\"liveFormat\"></span><br>"
+    "UID/Key: <span id=\"liveUID\"></span><br>"
+    "Bitstream: <span id=\"liveStream\"></span><br>"
+    "</div>"
     "<br>"
     "<strong>Main-Functions</strong><br>"
     "<button onclick=\"window.location.href='/logs'\">LOG + AUTOREPLAY</button>"
@@ -1380,6 +1476,18 @@ wg.onRawData([](volatile unsigned char* data, unsigned int bits) {
     //"www.RFID-Tool.com<br>"
     //"www.LegacySecurityGroup.com / www.Exploit.Agency</i><br>"
     //"-----<br>"
+    "<script>"
+    "function poll(){"
+    "fetch('/api/lastread').then(r=>r.json()).then(data=>{"
+    "document.getElementById('liveBits').innerText=data.bits;"
+    "document.getElementById('liveFormat').innerText=data.format;"
+    "document.getElementById('liveUID').innerText=data.uid;"
+    "document.getElementById('liveStream').innerText=data.bitstream;"
+    "}).catch(err=>console.log(err));"
+    "}"
+    "setInterval(poll,500);"
+    "poll();"
+    "</script>"
     "</body></html>"));
   });
 
@@ -1741,7 +1849,7 @@ server.on("/wiegand", []() {
     dataCONVERSION="";
   });
 
-  #include "api_server.h"
+  //#include "api_server.h"
 
   server.on("/stoptx", [](){
     server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Stop TX")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><body>This will kill any ongoing transmissions.<br><br>Are you sure?<br><br><a href=\"/stoptx/yes\">YES</a> - <a href=\"/\">NO</a></body></html>"));
@@ -2264,7 +2372,7 @@ server.on("/wiegand", []() {
     }
 
   });
-
+  initAPI();
   server.begin();
   WiFiClient client;
   client.setNoDelay(1);
