@@ -1,8 +1,9 @@
 /*
  * This is ESP-RFID-Tool-v2. It's  Einstein2150's fork of the original software from Corey Harding.
- * ESP-RFID-Tool-v2 uses a normal nodemcuv3 board which is more comfortable in flashing and debugging because the is a usb-interface and the ch340g communication-chip onboard which doesn't
- * require a separate flashing device like a serial-converter.
- * The Fork is 100% compatible with the original ESP-RFID-Board designed by Corey Harding.
+ * This software requires the advanced hardware platform of the classic ESP-RFID-Tool, specifically the ESP-RFID-Tool v2 PRO.
+ * It is available at esp-rfid.foto-video-it.de
+ * The ESP-RFID-Tool v2 PRO features a highly robust DC-DC voltage converter with an input range from 5 V to 30 V.
+ * In addition, it integrates a newly developed MOSFET based replay mechanism that ensures reliable and stable modulation of the Wiegand data lines.
  * 
  * ESP-RFID-Tool
  * by Corey Harding of www.Exploit.Agency / www.LegacySecurityGroup.com
@@ -824,7 +825,7 @@ void settingsPage()
   server.send(200, "text/html", 
   String()+
   F(
-    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Settings")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Settings")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
  "<h1>ESP-RFID-Tool Settings</h1>"
   "<a href=\"/restoredefaults\"><button>Restore Default Configuration</button></a>"
   "<hr>"
@@ -938,7 +939,7 @@ void handleSubmitSettings()
   
   if (SETTINGSvalue == "1") {
     saveConfig();
-    server.send(200, "text/html", F("<a href=\"/\"><- BACK TO INDEX</a><br><br><a href=\"/reboot\"><button>Reboot Device</button></a><br><br>Settings have been saved.<br>Some setting may require manually rebooting before taking effect.<br>If network configuration has changed then be sure to connect to the new network first in order to access the web interface."));
+    server.send(200, "text/html", F("<a href=\"/\"><- BACK TO MAIN-MENU</a><br><br><a href=\"/reboot\"><button>Reboot Device</button></a><br><br>Settings have been saved.<br>Some setting may require manually rebooting before taking effect.<br>If network configuration has changed then be sure to connect to the new network first in order to access the web interface."));
     delay(50);
     loadConfig();
   }
@@ -1137,7 +1138,7 @@ void ListLogs(){
   String freespace;
   freespace=fs_info.totalBytes-fs_info.usedBytes;
   Dir dir = SPIFFS.openDir(directory);
-     String FileList = String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Logs")+"<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>Select Logfile to display:<br><br><table border='1'><tr><td><b>Display File Content</b></td><td><b>Size in Bytes</b></td><td><b>Download File</b></td><td><b>Delete File</b></td></tr>";
+     String FileList = String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Logs")+"<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>Select Logfile to display:<br><br><table border='1'><tr><td><b>Display File Content</b></td><td><b>Size in Bytes</b></td><td><b>Download File</b></td><td><b>Delete File</b></td></tr>";
   while (dir.next()) {
     String FileName = dir.fileName();
     File f = dir.openFile("r");
@@ -1171,7 +1172,7 @@ void ViewLog(){
   String webString = f.readString();
   f.close();
   ShowPL = String()+F(
-    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - View Logs")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - View Logs")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
     "<button onclick=\"window.location.href='/logs'\">List Exfiltrated Data</button>"
     "<button onclick=\"window.location.href='/experimental'\">TX Mode</button>"
     "<button onclick=\"window.location.href='/data-convert'\">Data Conversion Tools</button>"
@@ -1211,7 +1212,7 @@ void ViewLog(){
       server.setContentLength(CONTENT_LENGTH_UNKNOWN);
       server.send(200, "text/html","");
       server.sendContent(String()+F(
-    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - View Logs")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+    "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - View Logs")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
     "<button onclick=\"window.location.href='/logs'\">List Exfiltrated Data</button>"
     "<button onclick=\"window.location.href='/experimental'\">TX Mode</button>"
     "<button onclick=\"window.location.href='/data-convert'\">Data Conversion Tools</button>"
@@ -1533,7 +1534,7 @@ else if (bits == 4) {
         "<!DOCTYPE HTML>"
         "<html>")+css("ESP-RFID-Tool-v2 - Device Status")+F(""
         "<body>"
-        "<button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+        "<button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
         "<h2>Wiegand-GPIO-status:</h2>"
         "DATA0 (Green) at D5: <strong>")+DATA0_stat+F("</strong><br>"
         "DATA1 (White) at D6: <strong>")+DATA1_stat+F("</strong><br>"
@@ -1565,7 +1566,7 @@ server.on("/keypad", []() {
   server.send(200, "text/html",
     String()+F("<!DOCTYPE HTML><html>")
     + css("ESP-RFID-Tool-v2 - Keypad")
-    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
+    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>")
   );
   // --- STYLE ---
   server.sendContent(F(
@@ -1612,7 +1613,7 @@ server.on("/wiegand", []() {
   server.send(200, "text/html",
     String()+F("<!DOCTYPE HTML><html>")
     + css("ESP-RFID-Tool-v2 - Wiegand Encoder")
-    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
+    + F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>")
   );
   // --- STYLE ---
   server.sendContent(F(
@@ -1658,8 +1659,27 @@ server.on("/wiegand", []() {
 
 
   server.on("/firmware", [](){
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Firmware")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>Open Arduino IDE.<br>Pull down \"Sketch\" Menu then select \"Export Compiled Binary\".<br>On this page click \"Browse\", select the binary you exported earlier, then click \"Update\".<br>You may need to manually reboot the device to reconnect.<br><iframe style =\"border: 0; height: 100%;\" src=\"http://")+local_IPstr+F(":1337/update\"><a href=\"http://")+local_IPstr+F(":1337/update\">Click here to Upload Firmware</a></iframe></body></html>"));
- //   String()+F("<html><body style=\"height: 100%;\"><a href=\"/\"><- BACK TO INDEX</a><br><br>Open Arduino IDE.<br>Pull down \"Sketch\" Menu then select \"Export Compiled Binary\".<br>On this page click \"Browse\", select the binary you exported earlier, then click \"Update\".<br>You may need to manually reboot the device to reconnect.<br><iframe style =\"border: 0; height: 100%;\" src=\"http://")+local_IPstr+F(":1337/update\"><a href=\"http://")+local_IPstr+F(":1337/update\">Click here to Upload Firmware</a></iframe></body></html>"));
+    server.send(200, "text/html",
+     String() +
+      F("<!DOCTYPE HTML><html>") +
+      css("ESP-RFID-Tool-v2 - Firmware") +
+      F("<body>"
+        "<button onclick=\"window.location.href='/'\">&lt;- BACK TO MAIN-MENU</button><br>"
+        "Download the latest Firmware for the ESP-RFID Tool v2 PRO from "
+        "<a href=\"https://github.com/Einstein2150/ESP-RFID-Tool-v2\">"
+        "https://github.com/Einstein2150/ESP-RFID-Tool-v2</a><br>"
+        "Click \"Browse\", select the firmware binary you downloaded, then click \"Update\".<br>"
+        "You may need to manually reboot the device to reconnect.<br>"
+        "<iframe style=\"border:0;height:100%;\" src=\"http://") +
+     local_IPstr +
+     F(":1337/update\">"
+       "<a href=\"http://") +
+     local_IPstr +
+     F(":1337/update\">Click here to Upload Firmware</a>"
+       "</iframe>"
+        "</body></html>")
+    ); 
+//   String()+F("<html><body style=\"height: 100%;\"><a href=\"/\"><- BACK TO MAIN-MENU</a><br><br>Open Arduino IDE.<br>Pull down \"Sketch\" Menu then select \"Export Compiled Binary\".<br>On this page click \"Browse\", select the binary you exported earlier, then click \"Update\".<br>You may need to manually reboot the device to reconnect.<br><iframe style =\"border: 0; height: 100%;\" src=\"http://")+local_IPstr+F(":1337/update\"><a href=\"http://")+local_IPstr+F(":1337/update\">Click here to Upload Firmware</a></iframe></body></html>"));
   });
 
   server.on("/restoredefaults", [](){
@@ -1669,7 +1689,7 @@ server.on("/wiegand", []() {
   server.on("/restoredefaults/yes", [](){
     if(!server.authenticate(update_username, update_password))
       return server.requestAuthentication();
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Restore")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>Network<br>---<br>SSID: <b>ESP-RFID-Tool</b><br><br>Administration<br>---<br>USER: <b>admin</b> PASS: <b>rfidtool</b>"));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Restore")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br>Network<br>---<br>SSID: <b>ESP-RFID-Tool</b><br><br>Administration<br>---<br>USER: <b>admin</b> PASS: <b>rfidtool</b>"));
     delay(50);
     loadDefaults();
     ESP.restart();
@@ -1688,13 +1708,13 @@ server.on("/wiegand", []() {
       return server.requestAuthentication();
     String deletelog;
     deletelog += server.arg(0);
-    if (!deletelog.startsWith("/payloads/")) server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Delete Log")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br><a href=\"/logs\">List Exfiltrated Data</a><br><br>Deleting file: ")+deletelog);
+    if (!deletelog.startsWith("/payloads/")) server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Delete Log")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br><a href=\"/logs\">List Exfiltrated Data</a><br><br>Deleting file: ")+deletelog);
     delay(50);
     SPIFFS.remove(deletelog);
   });
 
   server.on("/format", [](){
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Format")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>This will reformat the SPIFFS File System.<br><br>Are you sure?<br><br><a href=\"/format/yes\">YES</a> - <a href=\"/\">NO</a></body></html>"));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Format")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br>This will reformat the SPIFFS File System.<br><br>Are you sure?<br><br><a href=\"/format/yes\">YES</a> - <a href=\"/\">NO</a></body></html>"));
   });
 
   server.on("/logs", ListLogs);
@@ -1702,7 +1722,7 @@ server.on("/wiegand", []() {
   server.on("/reboot", [](){
     if(!server.authenticate(update_username, update_password))
     return server.requestAuthentication();
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Reboot")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>Rebooting Device..."));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Reboot")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br>Rebooting Device..."));
     delay(50);
     ESP.restart();
   });
@@ -1710,7 +1730,7 @@ server.on("/wiegand", []() {
   server.on("/format/yes", [](){
     if(!server.authenticate(update_username, update_password))
       return server.requestAuthentication();
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Format")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br>Formatting file system: This may take up to 90 seconds"));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Format")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br>Formatting file system: This may take up to 90 seconds"));
     delay(50);
 //    Serial.print("Formatting file system...");
     SPIFFS.format();
@@ -1820,7 +1840,7 @@ server.on("/wiegand", []() {
     }
     
     server.send(200, "text/html", String()+F(
-      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Conversion Tool")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>")
+      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Conversion Tool")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>")
       +dataCONVERSION+
       F(
       "<hr>"
@@ -1852,12 +1872,12 @@ server.on("/wiegand", []() {
   //#include "api_server.h"
 
   server.on("/stoptx", [](){
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Stop TX")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><body>This will kill any ongoing transmissions.<br><br>Are you sure?<br><br><a href=\"/stoptx/yes\">YES</a> - <a href=\"/\">NO</a></body></html>"));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Stop TX")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><body>This will kill any ongoing transmissions.<br><br>Are you sure?<br><br><a href=\"/stoptx/yes\">YES</a> - <a href=\"/\">NO</a></body></html>"));
   });
 
   server.on("/stoptx/yes", [](){
     TXstatus=0;
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Stop TX")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><br><a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>All transmissions have been stopped."));
+    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Stop TX")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br><a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>All transmissions have been stopped."));
   });
 
   server.on("/experimental", [](){
@@ -1913,7 +1933,7 @@ server.on("/wiegand", []() {
       }
 
       if (server.hasArg("bruteSTART")) {
-        server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br><a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>Brute forcing ")+pinBITS+F("bit Wiegand Format PIN from ")+(server.arg("bruteSTART"))+F(" to ")+(server.arg("bruteEND"))+F(" with a ")+pinHTMLDELAY+F("ms delay between \"keypresses\"<br>This may take a while, your device will be busy until the sequence has been completely transmitted!<br>Please \"STOP CURRENT TRANSMISSION\" before attempting to use your device or simply wait for the transmission to finish.<br>You can view if the brute force attempt has completed by returning to the TX page and checking the status located under \"Transmit Status\"<br><br><a href=\"/stoptx\"><button>STOP CURRENT TRANSMISSION</button></a>"));
+        server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>Brute forcing ")+pinBITS+F("bit Wiegand Format PIN from ")+(server.arg("bruteSTART"))+F(" to ")+(server.arg("bruteEND"))+F(" with a ")+pinHTMLDELAY+F("ms delay between \"keypresses\"<br>This may take a while, your device will be busy until the sequence has been completely transmitted!<br>Please \"STOP CURRENT TRANSMISSION\" before attempting to use your device or simply wait for the transmission to finish.<br>You can view if the brute force attempt has completed by returning to the TX page and checking the status located under \"Transmit Status\"<br><br><a href=\"/stoptx\"><button>STOP CURRENT TRANSMISSION</button></a>"));
         delay(50);
       }
 
@@ -2072,8 +2092,8 @@ server.on("/wiegand", []() {
       if ((server.arg("fuzzTimes"))=="dos") {
         dos=1;
         server.send(200, "text/html", String()+
-        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
-       // "<a href=\"/\"><- BACK TO INDEX</a><br><br>"
+        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
+       // "<a href=\"/\"><- BACK TO MAIN-MENU</a><br><br>"
         "<a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>"
         "Denial of Service mode active.<br>Transmitting D0 and D1 bits simultaneously until stopped."
         "<br>This may take a while, your device will be busy until the sequence has been completely transmitted!"
@@ -2085,8 +2105,8 @@ server.on("/wiegand", []() {
       else {
         fuzzTimes=server.arg("fuzzTimes").toInt();
         server.send(200, "text/html", String()+
-        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
-        //"<a href=\"/\"><- BACK TO INDEX</a><br><br>"
+        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
+        //"<a href=\"/\"><- BACK TO MAIN-MENU</a><br><br>"
         "<a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>"
         "Transmitting D0 and D1 bits simultaneously ")+fuzzTimes+F(" times."
         "<br>This may take a while, your device will be busy until the sequence has been completely transmitted!"
@@ -2143,8 +2163,8 @@ server.on("/wiegand", []() {
       if ((server.arg("fuzzTimes"))=="dos") {
         dos=1;
         server.send(200, "text/html", String()+
-        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
-        //"<a href=\"/\"><- BACK TO INDEX</a><br><br>"
+        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
+        //"<a href=\"/\"><- BACK TO MAIN-MENU</a><br><br>"
         "<a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>"
         "Denial of Service mode active.<br>Transmitting bits alternating between D0 and D1 until stopped."
         "<br>This may take a while, your device will be busy until the sequence has been completely transmitted!"
@@ -2156,8 +2176,8 @@ server.on("/wiegand", []() {
       else {
         fuzzTimes=server.arg("fuzzTimes").toInt();
         server.send(200, "text/html", String()+
-        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
-        //"<a href=\"/\"><- BACK TO INDEX</a><br><br>"
+        +F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - TX Mode")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
+        //"<a href=\"/\"><- BACK TO MAIN-MENU</a><br><br>"
         "<a href=\"/experimental\"><- BACK TO TX MODE</a><br><br>"
         "Transmitting ")+fuzzTimes+F(" bits alternating between D0 and D1."
         "<br>This may take a while, your device will be busy until the sequence has been completely transmitted!"
@@ -2261,7 +2281,7 @@ server.on("/wiegand", []() {
     server.send(200, "text/html", 
       String()+
       F(
-      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Manual Mode (Transmitting)")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO INDEX</button><br>"
+      "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Manual Mode (Transmitting)")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
       //"<!DOCTYPE HTML>"
       //"<html>"
       //"<head>"
@@ -2271,7 +2291,7 @@ server.on("/wiegand", []() {
       )+experimentalStatus+"<br><br>"
       +F(
       "<b>Transmit Status:</b> ")+activeTX+F("<br><br>"
-      //"<a href=\"/\"><- BACK TO INDEX</a><br>"
+      //"<a href=\"/\"><- BACK TO MAIN-MENU</a><br>"
       "<P>"
       "<h1>TX Mode</h1>"
       "<hr>"

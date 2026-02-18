@@ -26,7 +26,7 @@ font-size: 16px;
 <button onclick="window.location.href='/'"><- BACK TO INDEX</button><br>
 <pre>
 
-This is ESP-RFID-Tool-v2. It's Raik Schneider's aka Einstein2150's fork of the original software from Corey Harding:
+This is ESP-RFID-Tool-v2. It's Raik Schneider's aka Einstein2150's fork of the Legacy Version from Corey Harding:
 
 ESP-RFID-Tool by Corey Harding: https://www.LegacySecurityGroup.com
 Code available at: https://github.com/rfidtool/ESP-RFID-Tool
