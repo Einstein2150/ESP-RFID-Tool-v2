@@ -16,7 +16,7 @@ ESP-RFID-Tool-v2 PRO Firmware: [https://github.com/Einstein2150/ESP-RFID-Tool-v2
 ### UI 2.0
 - Modern, redesigned user interface  
 - Optimized for mobile devices
-
+- Live Event-Monitor
 
 
 <img src="Images/RFID-Tool_v2_PRO_ui.png" alt="capture" width="800"/>
