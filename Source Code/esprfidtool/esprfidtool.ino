@@ -1,7 +1,7 @@
 /*
  * This is ESP-RFID-Tool-v2. It's  Einstein2150's fork of the original software from Corey Harding.
  * This software requires the advanced hardware platform of the classic ESP-RFID-Tool, specifically the ESP-RFID-Tool v2 PRO.
- * It is available at esp-rfid.foto-video-it.de
+ * It is available at rfid-tool.foto-video-it.de
  * The ESP-RFID-Tool v2 PRO features a highly robust DC-DC voltage converter with an input range from 5 V to 30 V.
  * In addition, it integrates a newly developed MOSFET based replay mechanism that ensures reliable and stable modulation of the Wiegand data lines.
  * 
