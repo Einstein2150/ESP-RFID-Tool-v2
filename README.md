@@ -7,9 +7,11 @@ by Raik Schneider (Einstein2150)
   
 ESP-RFID-Tool-v2 PRO Firmware: [https://github.com/Einstein2150/ESP-RFID-Tool-v2/releases](https://github.com/Einstein2150/ESP-RFID-Tool-v2/releases)  
 ## Buy the ESP-RFID-Tool v2 PRO
-<img src="Images/RFID-Tool_v2_PRO_buy.png" alt="buy" width="250"/>
+<a href="http://RFID-tool.foto-video-it.de">
+  <img src="Images/RFID-Tool_v2_PRO_buy.png" alt="buy" width="250"/>
+</a>
 
-***THE BOARD IS AVAILABLE SOON***
+[Store link](http://RFID-tool.foto-video-it.de)
  
 ## Features
 
