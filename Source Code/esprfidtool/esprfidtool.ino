@@ -110,6 +110,22 @@ String newUIDFormat = "";
 
 #include "pinSEND.h"
 
+String htmlEscape(const String& s) {
+    String out;
+    out.reserve(s.length());
+    for (char c : s) {
+        switch (c) {
+            case '&': out += "&amp;"; break;
+            case '<': out += "&lt;"; break;
+            case '>': out += "&gt;"; break;
+            case '"': out += "&quot;"; break;
+            case '\'': out += "&#39;"; break;
+            default: out += c;
+        }
+    }
+    return out;
+}
+
 String dataCONVERSION="";
 
 String mapKeyToBits(char key, int bits) {
@@ -1203,8 +1219,6 @@ void ViewLog(){
   String payload;
   payload += server.arg(0);
   File f = SPIFFS.open(payload, "r");
-
-
   if (f) {
       server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
       server.sendHeader("Pragma", "no-cache");
@@ -1698,7 +1712,14 @@ server.on("/wiegand", []() {
   server.on("/deletelog", [](){
     String deletelog;
     deletelog += server.arg(0);
-    server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Delete Log")+F("<html><body>This will delete the file: ")+deletelog+F(".<br><br>Are you sure?<br><br><a href=\"/deletelog/yes?payload=")+deletelog+F("\">YES</a> - <a href=\"/\">NO</a></body></html>"));
+    String safe = htmlEscape(deletelog);
+    server.send(200, "text/html",
+        String()+F("<!DOCTYPE HTML><html>")+
+        css("ESP-RFID-Tool-v2 - Delete Log")+
+        F("<html><body>This will delete the file: ")+safe+
+        F(".<br><br>Are you sure?<br><br><a href=\"/deletelog/yes?payload=")+safe+
+        F("\">YES</a> - <a href=\"/\">NO</a></body></html>")
+    );
   });
 
   server.on("/viewlog", ViewLog);
@@ -1708,7 +1729,18 @@ server.on("/wiegand", []() {
       return server.requestAuthentication();
     String deletelog;
     deletelog += server.arg(0);
-    if (!deletelog.startsWith("/payloads/")) server.send(200, "text/html", String()+F("<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - Delete Log")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br><br><a href=\"/logs\">List Exfiltrated Data</a><br><br>Deleting file: ")+deletelog);
+    if (!deletelog.startsWith("/payloads/")) {
+        String safe = htmlEscape(deletelog);
+        server.send(200, "text/html",
+            String()+F("<!DOCTYPE HTML><html>")+
+            css("ESP-RFID-Tool-v2 - Delete Log")+
+            F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button>"
+              "<br><br><a href=\"/logs\">List Exfiltrated Data</a>"
+              "<br><br>Invalid file: ") + safe +
+            F("</body></html>")
+        );
+        return; 
+    }
     delay(50);
     SPIFFS.remove(deletelog);
   });
