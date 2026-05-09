@@ -852,6 +852,11 @@ void settingsPage()
   )+
   F("Access Point Mode: <INPUT type=\"radio\" name=\"accesspointmode\" value=\"1\"")+accesspointmodeyes+F("><br>"
   "Join Existing Network: <INPUT type=\"radio\" name=\"accesspointmode\" value=\"0\"")+accesspointmodeno+F("><br><br>"
+  "<div style='border:1px solid #cc0000; padding:10px; background:#ffeeee; margin-bottom:15px;'>"
+  "<b>⚠ Security Notice:</b><br>"
+  "When this device joins an existing network, its log and replay functions become accessible to other devices on the same network. "
+  "Ensure that only trusted users have access to the network or restrict access appropriately."
+  "</div>"
   "<b>Hidden<br></b>"
   "Yes <INPUT type=\"radio\" name=\"hidden\" value=\"1\"")+hiddenyes+F("><br>"
   "No <INPUT type=\"radio\" name=\"hidden\" value=\"0\"")+hiddenno+F("><br><br>"
@@ -1216,16 +1221,50 @@ void ViewLog(){
   server.send(200, "text/html", ShowPL);
 */
 
-  String payload;
-  payload += server.arg(0);
+String payload = server.arg(0);
+if (payload.indexOf("..") != -1) {
+    String safe = htmlEscape(payload);
+    server.sendHeader("Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+    server.send(400, "text/html",
+        String()+F("<!DOCTYPE HTML><html>")+
+        css("ESP-RFID-Tool-v2 - View Logs")+
+        F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button>"
+          "<br><br><b>Invalid path:</b> ") + safe +
+        F("<br><br><a href=\"/logs\">Back to Logs</a></body></html>")
+    );
+    return;
+}
+
+if (payload == "/esprfidtool.json") {
+    server.sendHeader("Content-Security-Policy",
+        "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+    server.send(403, "text/html",
+        String()+F("<!DOCTYPE HTML><html>")+
+        css("ESP-RFID-Tool-v2 - View Logs")+
+        F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button>"
+          "<br><br><b>Access denied:</b> /esprfidtool.json"
+          "<br><br><a href=\"/logs\">Back to Logs</a></body></html>")
+    );
+    return;
+}
+
   File f = SPIFFS.open(payload, "r");
+  if (!f) {
+        server.send(404, "text/plain", "File not found");
+        return;
+    }
+    
   if (f) {
-      server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-      server.sendHeader("Pragma", "no-cache");
-      server.sendHeader("Expires", "-1");
-      server.setContentLength(CONTENT_LENGTH_UNKNOWN);
-      server.send(200, "text/html","");
-      server.sendContent(String()+F(
+    server.sendHeader("Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+    server.sendHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    server.sendHeader("Pragma", "no-cache");
+    server.sendHeader("Expires", "-1");
+    server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server.send(200, "text/html","");
+    String safePayload = htmlEscape(payload);
+    server.sendContent(String()+F(
     "<!DOCTYPE HTML><html>")+css("ESP-RFID-Tool-v2 - View Logs")+F("<body><button onclick=\"window.location.href='/'\"><- BACK TO MAIN-MENU</button><br>"
     "<button onclick=\"window.location.href='/logs'\">List Exfiltrated Data</button>"
     "<button onclick=\"window.location.href='/experimental'\">TX Mode</button>"
@@ -1241,9 +1280,9 @@ void ViewLog(){
     "</FORM>"
     "<small>Use commas to separate the binary for transmitting multiple packets(useful for sending multiple keypresses for imitating keypads)</small><br>"
     "<hr>"
-    "<a href=\"")+payload+F("\"><button>Download File</button><a><a href=\"/deletelog?payload=")+payload+F("\"><button>Delete File</button></a>"
+    "<a href=\"")+safePayload+F("\"><button>Download File</button><a><a href=\"/deletelog?payload=")+safePayload+F("\"><button>Delete File</button></a>"
     "<pre>")
-    +payload+
+    +safePayload+
     F("\n"
     "Note: Preambles shown are only a guess based on card length and may not be accurate for every card format.\n"
     "-----\n"));

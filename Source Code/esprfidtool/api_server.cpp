@@ -34,6 +34,16 @@ extern void apiinfo(int prettify);
 extern void apilistlogs(int prettify);
 extern void apilog(String logfile, int prettify);
 
+int safeInt(String s, int minVal, int maxVal, int defaultVal) {
+    if (s.length() == 0) return defaultVal;
+    for (char c : s) {
+        if (!isDigit(c)) return defaultVal;
+    }
+    long val = s.toInt();
+    if (val < minVal || val > maxVal) return defaultVal;
+    return (int)val;
+}
+
 void initAPI() {
 
     // ---------------------------------------------------------
@@ -61,9 +71,12 @@ void initAPI() {
         int api_wait = 100000;
 
         if (server.hasArg("binary")) api_binary = server.arg("binary");
-        if (server.hasArg("pulsewidth")) api_pulsewidth = server.arg("pulsewidth").toInt();
-        if (server.hasArg("interval")) api_datainterval = server.arg("interval").toInt();
-        if (server.hasArg("wait")) api_wait = server.arg("wait").toInt();
+        if (server.hasArg("pulsewidth"))
+           api_pulsewidth = safeInt(server.arg("pulsewidth"), 1, 500, txdelayus);
+        if (server.hasArg("interval"))
+            api_datainterval = safeInt(server.arg("interval"), 100, 5000000, txdelayms * 1000);
+        if (server.hasArg("wait"))
+            api_wait = safeInt(server.arg("wait"), 1000, 10000000, 100000);
         if (server.hasArg("prettify")) prettify = 1;
 
         const size_t bufferSize = JSON_ARRAY_SIZE(4) + JSON_OBJECT_SIZE(5);
@@ -112,18 +125,14 @@ server.on("/api/txinstant/bin", []() {
   int api_pulsewidth = txdelayus;
   int api_datainterval = (txdelayms * 1000);
   int api_wait = 100000;
-  if (server.hasArg("binary")) {
+  if (server.hasArg("binary")) 
     api_binary = server.arg("binary");
-  }
-  if (server.hasArg("pulsewidth")) {
-    api_pulsewidth = server.arg("pulsewidth").toInt();
-  }
-  if (server.hasArg("interval")) {
-    api_datainterval = server.arg("interval").toInt();
-  }
-  if (server.hasArg("wait")) {
-    api_wait = server.arg("wait").toInt();
-  }
+  if (server.hasArg("pulsewidth"))
+    api_pulsewidth = safeInt(server.arg("pulsewidth"), 1, 500, txdelayus);
+  if (server.hasArg("interval"))
+    api_datainterval = safeInt(server.arg("interval"), 100, 5000000, txdelayms * 1000);
+  if (server.hasArg("wait"))
+    api_wait = safeInt(server.arg("wait"), 1000, 10000000, 100000);
   apiTX(api_binary, api_pulsewidth, api_datainterval, api_wait);
   server.send(200, "text/html",
     "<html><body><script>history.back();</script></body></html>");
