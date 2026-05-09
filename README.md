@@ -226,12 +226,20 @@ FTP Server:
 - Username: ftp-admin  
 - Password: rfidtool  
 
+#### ⚠️ Security Notice
+**Default credentials are intended only for initial setup. You should change all default passwords immediately after first boot, even when using the device in standalone AP‑mode.**
+
 ### WiFi Configuration
 
 Network Type:
 
 - Access Point Mode: Creates a standalone access point without internet connectivity. Close proximity required  
+
 - Join Existing Network: Connects to an existing network. Remote access possible  
+
+####⚠️ Important:
+**Set a WPA password for the AP to prevent unauthorized access. Leaving the AP open is not recommended. Change the admin password even in AP‑mode.**
+**When joining a network, all devices in that network can reach the web interface unless protected by a strong admin password. Always change the default admin password before enabling client mode. This mode should only be used in trusted networks.**
 
 Additional settings:
 
